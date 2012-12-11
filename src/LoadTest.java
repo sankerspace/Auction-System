@@ -2,6 +2,7 @@
 import MyLogger.Log;
 import auctionmanagement.AuctionClientException;
 import LoadTest.AuctionTest;
+import LoadTest.AuctionTestException;
 import java.io.PrintWriter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,7 +31,7 @@ public class LoadTest {
             
             AuctionTest Test=null;
             
-            Log logger=new Log(new PrintWriter(System.out),2); 
+            Log logger=new Log(new PrintWriter(System.out)); 
             
             
             if(args.length==3)
@@ -53,6 +54,9 @@ public class LoadTest {
             }
             
            
+        }catch(AuctionTestException ex)
+        {
+            System.out.println("LoadTest:AuctionTestException:"+ex.getMessage());
         }catch(NumberFormatException ex)
         {
             System.out.println("LoadTest:NumberFormatException:port number not correct.");

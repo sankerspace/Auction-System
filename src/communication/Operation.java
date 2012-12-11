@@ -35,7 +35,7 @@ public class Operation {
            
         }catch(ClientException e)
         {
-            throw new OperationException("OperationException::",e);
+            throw new OperationException("ClientException::"+e.getMessage());
         }
         
     }
@@ -52,7 +52,7 @@ public class Operation {
             
         }catch(IOException e)
         {
-            throw new OperationException("OperationException::",e);
+            throw new OperationException("IOException::"+e.getMessage());
         }
         
        
@@ -69,7 +69,7 @@ public class Operation {
             
         }catch(IOException e)
         {
-            throw new OperationException("OperationException::",e);
+            throw new OperationException("IOException::"+e.getMessage());
         }
     }
    
@@ -83,7 +83,7 @@ public class Operation {
             
         }catch(Exception e)
         {
-            throw new OperationException("OperationException::",e);
+            throw new OperationException("Exception::"+e.getMessage());
         }
         
        
@@ -100,7 +100,7 @@ public class Operation {
             
         }catch(Exception e)
         {
-            throw new OperationException("OperationException::",e);
+            throw new OperationException("Exception::"+e.getMessage());
         }
     }
     
@@ -119,7 +119,7 @@ public class Operation {
             
         }catch(Exception e)
         {
-            throw new OperationException("OperationException::",e);
+            throw new OperationException("Exception::"+e.getMessage());
         }
     }
     

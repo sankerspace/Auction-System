@@ -1,8 +1,10 @@
 package auctionmanagement;
 
 import java.sql.Time;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  *
@@ -24,7 +26,8 @@ public class Auction {
         
         id=getNewAuctionID();
         this.owner=owner;
-        this.starttime=new Date();
+        long timenow=Calendar.getInstance().getTimeInMillis();
+        this.starttime=new Date(timenow);
         this.duration=expires;
         this.description=description;
         highest_bid_amount=0.00;
@@ -49,14 +52,28 @@ public class Auction {
     
     public String getstartDate()
     {
-        return this.starttime.toString();
+        int medium = DateFormat.MEDIUM;
+        DateFormat df = DateFormat.getDateTimeInstance( medium, medium, Locale.GERMAN );
+        return df.format(starttime);
+    }
+    
+    public Date getstartDateObject()
+    {
+       return this.starttime;
+    }
+    
+    public Date getEndDateObject()
+    {
+       return new Date(this.starttime.getTime()+(this.duration*1000));
     }
     
     public String getEndDate()
     {
        long millisecond=this.starttime.getTime();
        millisecond = millisecond + (this.duration*1000); 
-       return (new Date(millisecond)).toString();
+       int medium = DateFormat.MEDIUM;
+       DateFormat df = DateFormat.getDateTimeInstance( medium, medium, Locale.GERMAN );
+       return df.format(new Date(millisecond));
         
     }
     

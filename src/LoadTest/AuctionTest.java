@@ -44,14 +44,20 @@ public class AuctionTest
     private String AnalyticBindingName=null;
     private ReentrantLock controlManagementClientLock=null;
     
+    
+            
     public AuctionTest(String host,int port,String AnalyticBindingName,
             int clients,
             int auctionsPerMin,
             int auctionDuration,
             int updateIntervalSec,
             int bidsPerMin,
-            Log logger)
+            Log logger) throws AuctionTestException
     {
+        if( (clients<1) || (auctionsPerMin < 1) || (auctionDuration<1) 
+                || (updateIntervalSec<1) || (bidsPerMin<1) || (logger==null)
+                || (host==null) || (port<1) || (AnalyticBindingName==null))
+            throw new AuctionTestException("Illegal parameter passed.");
         
         pool = Executors.newCachedThreadPool();
         this.logger=logger;
@@ -65,8 +71,12 @@ public class AuctionTest
                 updateIntervalSec,
                 bidsPerMin);
         
+        
+        
     }
 
+    
+    
     public void run() throws AuctionTestException
     {
         logger.output("AuctionTest:run:Start AuctionTest",2);
@@ -80,7 +90,7 @@ public class AuctionTest
         ManagementClientForLoadTest managementclient=null;
         managementclient=new ManagementClientForLoadTest("./src/registry.properties",
                 this.AnalyticBindingName,controlManagementClientLock);
-        pool.execute(managementclient);
+        //pool.execute(managementclient);
        
         
         int i=0;
@@ -96,7 +106,6 @@ public class AuctionTest
                  logger.output("AuctionTest:run:Create AuctionTestClient "+i+".",2);
                  auctionclient[i]= new AuctionTestClient(i,host,
                         port,
-                        AnalyticBindingName,
                         prop,                   
                         pool,
                         logger);
@@ -129,7 +138,8 @@ public class AuctionTest
                     {
                         logger.output("AuctionTest:run:finally:"
                                 +"Close auctionclient "+j+".",3);
-                        auctionclient[j].close();
+                        auctionclient[j].getWaitingRoom().callingfromWaitingRoom();
+                        //wakes up the client to proceed to death
                     }
                 }
                     

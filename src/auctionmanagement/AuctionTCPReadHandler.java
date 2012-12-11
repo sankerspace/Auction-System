@@ -11,6 +11,8 @@ import communication.Operation;
 import communication.OperationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -37,6 +39,13 @@ public class AuctionTCPReadHandler implements Runnable{
         {   
             String command=r.getCommandName();
             CommandTask c=null;
+            if(command==null)
+            {
+                
+                logger.output("AuctionTCPReadHandler:ExtractInfo:Command points to null!");
+            }
+            
+            
             if(command.contains("list"))
             {   
                 CommandTask.List l = new CommandTask.List(r.getClient());
@@ -91,26 +100,23 @@ public class AuctionTCPReadHandler implements Runnable{
                
                     
                   message=op.readString();
-                  if(message.contains("end"))break;
-                  com = this.ExtractInfo(new Request(this.client,message));               
-                  this.queue.offer(com); 
-                   logger.output("ServerSocketHandleThread received"
-                           +" message and forwarded a CommandTask Object to AMSThread:\n"
-                           +"CommandTask[ServerSocketHandlThread]:"+"\n"
-                           +com.toString(), 3);
-                  
-                
-                 
-                
+                  if(message!=null)
+                  {
+                      if(message.contains("end"))break;
+                      com = this.ExtractInfo(new Request(this.client,message));               
+                      this.queue.offer(com); 
+                       logger.output("ServerSocketHandleThread received"
+                               +" message and forwarded a CommandTask Object to AMSThread:\n"
+                               +"CommandTask[ServerSocketHandlThread]:"+"\n"
+                               +com.toString(), 3);
+                  }else
+                      logger.output("ServerSocketHandleThread received a null message.");
+
                 }
           
-                 this.client.closeSocket();
+                
                  
-            }catch(ClientException e)
-            {
-                this.logger.output("ServerSocketHandleThread:ClientException:"+e.getMessage(),2);
-                 Thread.currentThread().interrupt();
-            } catch (OperationException ex) {
+            }catch (OperationException ex) {
                 
                     CommandTask.End l = new CommandTask.End(this.client);
                     CommandTask c= new CommandTask(l);
@@ -118,7 +124,19 @@ public class AuctionTCPReadHandler implements Runnable{
                     
                    this.logger.output("ServerSocketHandleThread:OperationException:"+ex.getMessage(),2);
                    Thread.currentThread().interrupt();
+             }catch (Exception ex) {
+                
+                   
+                   this.logger.output("ServerSocketHandleThread:Exception:"+ex.getMessage());
+                   Thread.currentThread().interrupt();
+             }finally{
+                try {
+                    this.logger.output("ServerSocketHandleThread:finally:Close Socket",2);
+                    this.client.closeSocket();
+                } catch (ClientException ex) {
+                    this.logger.output("ServerSocketHandleThread:finally:ClientException:"+ex.getMessage());
                 }
+            }
             logger.output("ServerSocketHandleThread end....", 2);
            
             

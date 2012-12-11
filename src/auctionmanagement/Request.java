@@ -67,7 +67,7 @@ public class Request {
         CheckRequest check = new CheckRequest(message,false);
         this.client=client;
         this.command=check.getCommand();
-        parameter = check.getParam();
+        this.parameter = check.getParam();
         if(parameter!=null)
         {
             if(parameter.loginUdpPort!=-1)
