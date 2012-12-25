@@ -121,7 +121,7 @@
 
     <target name="run-mgmtclient3" depends="compile" description="Run Management Client 3.">
         <java classname="${mgmtclient.name}" fork="true" classpathref="project.classpath">
-            <assertions refid="project.assertions"/>
+            <assertions refid="project.assertiones"/>
             <arg value="${analytics.bindingName}"/>
             <arg value="${billing.bindingName}"/>
         </java>
