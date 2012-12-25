@@ -21,7 +21,7 @@ public class FindPathUnderLinuxOrWindows {
     String pathtoClientKeys = null;
     public FindPathUnderLinuxOrWindows() {
          pathtoServerKeys = "./keys/Server";
-         pathtoClientKeys = "./keysClients";
+         pathtoClientKeys = "./keys/Clients";
     }
     
     @BeforeClass
