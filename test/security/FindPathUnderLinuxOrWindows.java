@@ -20,8 +20,8 @@ public class FindPathUnderLinuxOrWindows {
     String pathtoServerKeys = null;
     String pathtoClientKeys = null;
     public FindPathUnderLinuxOrWindows() {
-         pathtoServerKeys = "./keys/Server";
-         pathtoClientKeys = "./keys/Clients";
+         pathtoServerKeys = "./keys/Server/";
+         pathtoClientKeys = "./keys/Clients/";
     }
     
     @BeforeClass
@@ -60,6 +60,15 @@ public class FindPathUnderLinuxOrWindows {
         
         File path=new File(pathtoClientKeys);
         assertEquals(true, path.isDirectory());
+    }
+     @Test
+     public void testFindClientKeyFile() throws Exception {
+        System.out.println("Test if a path to the client key public file is valid(linux and windows):");
+        System.out.println("path to Client file(from outside the test enviromnemt):"+
+                "./keys/Clients/alice.public.pem");
+        
+        File publicKey=new File(pathtoClientKeys+"alice.pub.pem");
+        assertEquals(true, publicKey.isFile());
     }
     
 }
