@@ -4,12 +4,15 @@
  */
 package security;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.security.KeyPair; 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
@@ -17,7 +20,10 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import java.security.PublicKey;
 import java.security.PrivateKey;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PasswordFinder;
 
 /**
  *
@@ -49,12 +55,12 @@ public class RSAAuthentication {
     {
         try {   
             
-             ServerKeydirectory=new File(ServerKeyDirectory);
-                if(!ServerKeydirectory.isDirectory())
-                    throw new RSAAuthenticationException("Constructor:Invalid Server Directory");
-                ClientKeydirectory=new File(ClientKeyDirectory);
-                if(!ClientKeydirectory.isDirectory())
-                    throw new RSAAuthenticationException("Constructor:Invalid Client Directory");
+            ServerKeydirectory=new File(ServerKeyDirectory);
+            if(!ServerKeydirectory.isDirectory())
+                throw new RSAAuthenticationException("Constructor:Invalid Server Directory");
+            ClientKeydirectory=new File(ClientKeyDirectory);
+            if(!ClientKeydirectory.isDirectory())
+                throw new RSAAuthenticationException("Constructor:Invalid Client Directory");
             
             
 
@@ -102,16 +108,50 @@ public class RSAAuthentication {
     
     
     PrivateKey getPrivateKey(String file)throws RSAAuthenticationException
-    {//!!Directory anagaben gehn unter unix und Linux????
+    {//!!Directory anagaben gehn unter windows und Linux????
         PEMReader in = null;
         PrivateKey key=null;
         try {
+            PasswordFinder pwFinder=new PasswordFinder()
+            {//implementation of interface PasswortFinder()
+                @Override 
+                public char[] getPassword() {
+                
+                    // reads the password from standard input for decrypting the private key
+                    System.out.println("Enter pass phrase:");
+                    char[] array=null;
+                    String line=null;
+                    BufferedReader input=null;
+                    try {
+                        input = new BufferedReader(new InputStreamReader(System.in));
+                        input.read();
+                        line=input.readLine();
+                        while((line=input.readLine())!=null)
+                        {
+                            break;
+                        }
+                        array = line.toCharArray();
+                    } catch (IOException ex) {
+                       
+                    }finally
+                    {
+                        try {
+                            input.close();
+                        } catch (IOException ex) {
+                            
+                        }
+                    }
+                    return array;
+    
+                };
+            };
             
-            in = new PEMReader(new FileReader(file));
-            key = (PrivateKey) in.readObject();
+            in = new PEMReader(new FileReader(file),pwFinder);
+            KeyPair keyPair = (KeyPair)in.readObject();
+            key=keyPair.getPrivate();
             
         } catch (IOException ex) {
-           throw new RSAAuthenticationException("getPublicKeyfromUser:IOException:"+
+           throw new RSAAuthenticationException("getPrivateKeyfromUser:IOException:"+
                    ex.getMessage());
         } finally {
             try {
@@ -123,6 +163,16 @@ public class RSAAuthentication {
         }
         
         return key;
+    }
+    
+    String getServerKeyDirectorypath()
+    {
+        return this.ServerKeydirectory.getPath();
+    }
+    
+    String getClientKeyDirectorypath()
+    {
+        return this.ClientKeydirectory.getPath();
     }
    
 }
