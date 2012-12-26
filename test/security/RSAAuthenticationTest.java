@@ -4,8 +4,11 @@
  */
 package security;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Scanner;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,10 +24,19 @@ public class RSAAuthenticationTest {
     
     String ServerkeyDirectory=null; 
     String ClientkeyDirectory=null;
-    
+    public static InputStream stdin=System.in;
+   // ByteArrayInputStream stream
     public RSAAuthenticationTest() {
         ServerkeyDirectory="./keys/Server/";
         ClientkeyDirectory="./keys/Clients/";
+        
+        
+        String data = "23456\n";
+
+        System.setIn(new ByteArrayInputStream(data.getBytes()));
+        //Scanner scanner = new Scanner(System.in);
+        //System.out.println(scanner.nextLine());
+        
     }
     
     @BeforeClass
@@ -33,6 +45,7 @@ public class RSAAuthenticationTest {
     
     @AfterClass
     public static void tearDownClass() {
+        System.setIn(stdin);
     }
     
     @Before

@@ -42,8 +42,8 @@ import org.bouncycastle.openssl.PasswordFinder;
  */
 public class RSAAuthentication {
     
-    
-    protected SecureRandom random=null; 
+    private boolean protocolstatus;
+    protected SecureRandom securerandom=null; 
     protected Cipher c1=null; //c1 cipher for outgoing messages
     protected Cipher c2=null;  //c2 cipher for incoming messages
     
@@ -64,10 +64,12 @@ public class RSAAuthentication {
             
             
 
-            random=SecureRandom.getInstance("SHA1PRNG");
+            //random=SecureRandom.getInstance("SHA1PRNG");
+            securerandom=new SecureRandom();
             c1=Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding","BC");
             c2=Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding","BC");
-            
+            //if something in the handshakeprotocol goes wrong protocolstatus=false;
+            protocolstatus=true;
             
         } catch (NoSuchProviderException ex) {
             throw new RSAAuthenticationException("Constructor:NoSuchProviderException:"+
@@ -124,8 +126,6 @@ public class RSAAuthentication {
                     BufferedReader input=null;
                     try {
                         input = new BufferedReader(new InputStreamReader(System.in));
-                        input.read();
-                        line=input.readLine();
                         while((line=input.readLine())!=null)
                         {
                             break;
