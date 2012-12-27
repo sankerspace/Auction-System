@@ -5,7 +5,10 @@
 package security;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Scanner;
@@ -22,18 +25,23 @@ import static org.junit.Assert.*;
  */
 public class RSAAuthenticationTest {
     
-    String ServerkeyDirectory=null; 
-    String ClientkeyDirectory=null;
+    private String ServerkeyDirectory=null; 
+    private String ClientkeyDirectory=null;
     public static InputStream stdin=System.in;
+    private PipedInputStream inputPipe=null;
+    private PipedOutputStream outputPipe=null;
    // ByteArrayInputStream stream
-    public RSAAuthenticationTest() {
+    public RSAAuthenticationTest() throws IOException {
         ServerkeyDirectory="./keys/Server/";
         ClientkeyDirectory="./keys/Clients/";
         
         
-        String data = "23456\n";
-
-        System.setIn(new ByteArrayInputStream(data.getBytes()));
+        //String data = "23456\n";
+        //ByteArrayInputStream stream=new ByteArrayInputStream(data.getBytes());
+        inputPipe=new PipedInputStream();
+        System.setIn(inputPipe);
+        outputPipe=new PipedOutputStream(inputPipe);
+        //System.setIn(new ByteArrayInputStream(data.getBytes()));
         //Scanner scanner = new Scanner(System.in);
         //System.out.println(scanner.nextLine());
         
@@ -53,7 +61,10 @@ public class RSAAuthenticationTest {
     }
     
     @After
-    public void tearDown() {
+    public void tearDown() throws IOException {
+        this.outputPipe.close();
+        this.inputPipe.close();
+       
     }
 
     /**
@@ -65,6 +76,7 @@ public class RSAAuthenticationTest {
       
         RSAAuthentication instance = new RSAAuthentication(ClientkeyDirectory,
                 ServerkeyDirectory);
+        
         String file = instance.getServerKeyDirectorypath()+"/auction-server.pub.pem";
         PublicKey expResult = null;
         PublicKey result = instance.getPublicKey(file);
@@ -86,6 +98,8 @@ public class RSAAuthenticationTest {
                 ServerkeyDirectory);
         String file = instance.getServerKeyDirectorypath()+"/auction-server.pem";
         PrivateKey expResult = null;
+        
+        this.outputPipe.write((new String("23456\n")).getBytes());
         PrivateKey result = instance.getPrivateKey(file);
         //assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
