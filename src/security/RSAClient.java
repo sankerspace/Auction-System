@@ -82,11 +82,11 @@ public class RSAClient extends RSAAuthentication{
     //userinfo contains the tcpPort information, but business logic
     //has no place in the security package
     //the entire message is NOT Base64 encoded, this is outside work
-    public byte[] ClientToServerHandshakeProtocol(String user,String userinfo)throws RSAAuthenticationException
+    public byte[] HandshakeProtocolMessageOneCreate(String user,String userinfo)throws RSAAuthenticationException
     {
         /**
          * msg=!login +user +userinfo   +Base64(clientchallenge) 
-         * return RSA(msg)
+         * return Base64(RSA(msg))
          */
         
         try {
@@ -103,7 +103,7 @@ public class RSAClient extends RSAAuthentication{
            
             encrypted=c1.doFinal(message.getBytes());
       
-            return encrypted;
+            return Base64Encoder.encodeBase64(encrypted);
             
         } catch (IllegalBlockSizeException ex) {
             throw new RSAAuthenticationException("ClientToServerHandshakeProtocol:IllegalBlockSizeException:"+ex.getMessage());
@@ -115,20 +115,23 @@ public class RSAClient extends RSAAuthentication{
         }
     }
     
-    public boolean FromServerToClientHandshakeProtocol(byte[] encrypted)throws RSAAuthenticationException
+    public boolean HandshakeProtocolMessageTwoHandle(byte[] encrypted)throws RSAAuthenticationException
     {
-        /**
+            /**
+             * encrypted=Base64(msg)
              * msg=RSA(!ok +Base64(clientchallenge)+Base64(serverchallenge)
              *         +Base64(SecretKey)      +Base64(IV parameter) ) 
              * 
              * */
         try {
+            //decode Base64
+            byte[] tmp=Base64Encoder.decodeBase64(encrypted);
             //decrypt RSA
-            String[] msg=(new String(c2.doFinal(encrypted))).split(" ");
+            String[] msg=(new String(c2.doFinal(tmp))).split(" ");
             if(msg[0].contains("!ok")&&(msg.length==5))
             {
                //get clientchallenge and compare with own challenge
-                byte[] tmp=Base64Encoder.decodeBase64(msg[1].getBytes());
+                tmp=Base64Encoder.decodeBase64(msg[1].getBytes());
                 if(!this.compareChallenges(tmp, clientChallenge))
                 {
                     logger.error("clientChallenge from Server does not correspond to our challenge.");
@@ -159,6 +162,33 @@ public class RSAClient extends RSAAuthentication{
         return true;
     }
     
+    
+    public byte[] HandshakeProtocolMessageThreeCreate()throws RSAAuthenticationException
+    {
+        /**
+         * return Base64(AES(Base64(serverchallenge)))
+         * 
+         * 
+         */
+        
+        if(this.serverChallenge==null)
+            throw new RSAAuthenticationException("No ServerChallenge created.");
+
+        //Base64(serverChallenge)
+        byte[] tmp=Base64Encoder.encodeBase64(this.serverChallenge);
+        try {
+            //create AES object for last message and for further comminication
+            this.aes=new AES(this.Secretkey,this.IVParameter);
+            //Base64(AES(tmp))
+            tmp=this.aes.encrypt(tmp);
+            
+        } catch (AESException ex) {
+             throw new RSAAuthenticationException("AESException:"+ex.getMessage());
+        }
+        
+        return tmp;
+        
+    } 
     
     
 }

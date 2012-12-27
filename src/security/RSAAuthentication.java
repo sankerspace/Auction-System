@@ -55,6 +55,9 @@ public class RSAAuthentication {
     protected byte[]    serverChallenge=null;
     protected SecretKey Secretkey=null;
     protected byte[]    IVParameter=null;
+    
+    protected AES aes=null;
+    
     public RSAAuthentication(String ClientKeyDirectory
             ,String ServerKeyDirectory) throws RSAAuthenticationException
     {
@@ -211,6 +214,11 @@ public class RSAAuthentication {
     public String getErrorMessage()
     {
         return "!denied";
+    }
+    
+    public AES getAES()
+    {
+        return this.aes;
     }
     
 }

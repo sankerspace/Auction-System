@@ -116,16 +116,19 @@ import javax.crypto.SecretKey;
         
         
         
-        public boolean FromClientToServerHandshakeProtocol(byte[] encrypted)throws RSAAuthenticationException
+        public boolean HandshakeProtocolMessageOneHandle(byte[] encrypted)throws RSAAuthenticationException
         {
             /**
+             * encrypted=Base64(msg)
              * msg=RSA(!login +user +userinfo   +Base64(clientchallenge)) 
              * 
              */
             try {
                 logger.info("Read Request of the first message from Client");
+                //decode Base64
+                byte[] tmp=Base64Encoder.decodeBase64(encrypted);
                //decrypt RSA message
-                byte[] message=c2.doFinal(encrypted);
+                byte[] message=c2.doFinal(tmp);
                 //get message components
                 String[] msg=(new String(message)).split(" ");
                 if(msg.length<4)
@@ -171,12 +174,12 @@ import javax.crypto.SecretKey;
         }
         
         
-        public byte[] ServerToClientHandshakeProtocol()throws RSAAuthenticationException
+        public byte[] HandshakeProtocolMessageTwoCreate()throws RSAAuthenticationException
         {
             /**
              * msg=!ok +Base64(clientchallenge)+Base64(serverchallenge)
              *         +Base64(SecretKey)      +Base64(IV parameter)  
-             * return RSA(msg)
+             * return Base64( RSA(msg) )
              * */
             //Base64(clientchallenge)
             logger.info("Create second responsemessage for Handshake Protocol.");
@@ -209,11 +212,33 @@ import javax.crypto.SecretKey;
             } catch (BadPaddingException ex) {
                 throw new RSAAuthenticationException("ServerToClientHandshakeProtocol:createSessionKey:"+ex.getMessage());
             }
-            
-            return encrypted;
+            //encode base64 and return
+            return Base64Encoder.encodeBase64(encrypted);
         }
         
+        public boolean HandshakeProtocolMessageThreeHandle(byte[] encrypted)throws RSAAuthenticationException
+        {
+            /**
+             * encrypted=Base64(AES(Base64(serverChallenge)))
+             * 
+             * 
+             */
+            //Base64 decode
+            byte[] tmp= Base64Encoder.decodeBase64(encrypted);
+            byte[] challenge=null;
+            try {
+                //create AES object to decode message and for further commmunication
+                aes=new AES(this.Secretkey,this.IVParameter);
+                //decrypt AES and decode base64
+                challenge=aes.decrypt(tmp);
+                
+            } catch (AESException ex) {
+               throw new RSAAuthenticationException("AESException:"+ex.getMessage());
+            }
+            
+            return compareChallenges(challenge, this.serverChallenge);
         
+        }
         
         
         
