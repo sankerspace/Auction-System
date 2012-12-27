@@ -60,8 +60,19 @@
     <!-- Print only messages of level warn or above in the package com.foo -->
     <level value="error"/> 
   </logger>
-
-
+<!-- ************* Package Security ******************************  -->
+  <logger name="RSAAuthentication">
+    <!-- Print only messages of level warn or above in the package com.foo -->
+    <level value="all"/> 
+  </logger>
+<logger name="RSAClient">
+    <!-- Print only messages of level warn or above in the package com.foo -->
+    <level value="all"/> 
+  </logger>
+<logger name="RSAServer">
+    <!-- Print only messages of level warn or above in the package com.foo -->
+    <level value="all"/> 
+  </logger>
 
   <root> 
     <priority value ="all" /> 

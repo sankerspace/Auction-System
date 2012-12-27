@@ -20,8 +20,8 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import java.security.PublicKey;
 import java.security.PrivateKey;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.crypto.SecretKey;
+import org.apache.log4j.xml.DOMConfigurator;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PasswordFinder;
 
@@ -42,18 +42,25 @@ import org.bouncycastle.openssl.PasswordFinder;
  */
 public class RSAAuthentication {
     
-    private boolean protocolstatus;
+    //private boolean protocolstatus;
+    private static org.apache.log4j.Logger log=org.apache.log4j.Logger.getLogger(RSAAuthentication.class.getSimpleName());
     protected SecureRandom securerandom=null; 
-    protected Cipher c1=null; //c1 cipher for outgoing messages
-    protected Cipher c2=null;  //c2 cipher for incoming messages
-    
-    protected File ServerKeydirectory=null;
-    protected File ClientKeydirectory=null;
-    
+    protected Cipher    c1=null; //c1 cipher for outgoing messages
+    protected Cipher    c2=null;  //c2 cipher for incoming messages
+    protected File      ServerKeydirectory=null;
+    protected File      ClientKeydirectory=null;
+    protected String    servername=null;
+    protected String    clientname=null;
+    protected byte[]    clientChallenge=null;
+    protected byte[]    serverChallenge=null;
+    protected SecretKey Secretkey=null;
+    protected byte[]    IVParameter=null;
     public RSAAuthentication(String ClientKeyDirectory
             ,String ServerKeyDirectory) throws RSAAuthenticationException
     {
         try {   
+            
+            DOMConfigurator.configure("./src/log4j.xml"); 
             
             ServerKeydirectory=new File(ServerKeyDirectory);
             if(!ServerKeydirectory.isDirectory())
@@ -61,7 +68,7 @@ public class RSAAuthentication {
             ClientKeydirectory=new File(ClientKeyDirectory);
             if(!ClientKeydirectory.isDirectory())
                 throw new RSAAuthenticationException("Constructor:Invalid Client Directory");
-            
+           log.info("Initialized key directories.");
             
 
             //random=SecureRandom.getInstance("SHA1PRNG");
@@ -69,7 +76,7 @@ public class RSAAuthentication {
             c1=Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding","BC");
             c2=Cipher.getInstance("RSA/NONE/OAEPWithSHA256AndMGF1Padding","BC");
             //if something in the handshakeprotocol goes wrong protocolstatus=false;
-            protocolstatus=true;
+             log.info("Initialized ciphers.");
             
         } catch (NoSuchProviderException ex) {
             throw new RSAAuthenticationException("Constructor:NoSuchProviderException:"+
@@ -165,14 +172,45 @@ public class RSAAuthentication {
         return key;
     }
     
-    String getServerKeyDirectorypath()
+   protected boolean compareChallenges(byte[] challenge1,byte[] challenge2) 
+   {
+       int size=challenge1.length;
+       if(size !=challenge2.length)
+           return false;
+       
+       for(int i=0;i<size;i++)
+       {
+           if(challenge1[i]!=challenge2[i])
+               return false;
+       }
+
+       return true;
+   }
+    
+   public String getServerKeyDirectorypath()
     {
         return this.ServerKeydirectory.getPath();
     }
     
-    String getClientKeyDirectorypath()
+   public String getClientKeyDirectorypath()
     {
         return this.ClientKeydirectory.getPath();
     }
    
+   public String getUsername()
+    {
+        return this.clientname;
+    }
+    
+    public String getServername()
+    {
+        return this.servername;
+    }
+    
+    
+    public String getErrorMessage()
+    {
+        return "!denied";
+    }
+    
 }

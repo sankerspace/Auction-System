@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  *
@@ -28,21 +29,18 @@ public class RSAClient extends RSAAuthentication{
          * 
          * 
          **/
-    
+    private static org.apache.log4j.Logger logger=org.apache.log4j.Logger.getLogger(RSAClient.class.getSimpleName());
     private PublicKey publicKeyServer=null;
     private PrivateKey privateKeyClient=null;
-    
-    private byte[] clientChallenge=null;
-    private byte[] serverChallenge=null;
-    
-    private  byte[] SecretKey=null;
-    private byte[]  IVParameter=null;
+   
     
     public RSAClient(String user,String servername,String ClientKeyDirectory
         ,String ServerKeyDirectory)throws RSAAuthenticationException
     {
         super(ClientKeyDirectory,ServerKeyDirectory);
-
+        this.clientname=user;
+        this.servername=servername;   
+       
         try {
 
             File publicServerKeyFile = new File(this.ServerKeydirectory.getPath()+File.pathSeparator+
@@ -70,41 +68,95 @@ public class RSAClient extends RSAAuthentication{
              
 
         } catch (InvalidKeyException ex) {
-            throw new RSAAuthenticationException("RAS_Server:NoSuchAlgorithmException:"+
+            throw new RSAAuthenticationException("RSAClient:NoSuchAlgorithmException:"+
+               ex.getMessage());
+        }catch (Exception ex) {
+            throw new RSAAuthenticationException("RSAClient:Exception:"+
                ex.getMessage());
         }
     }
+    
+    
+    
     //first message of client
     //userinfo contains the tcpPort information, but business logic
     //has no place in the security package
     //the entire message is NOT Base64 encoded, this is outside work
-    public byte[] createRequestHandshakeProtocol(String user,String userinfo)throws RSAAuthenticationException
+    public byte[] ClientToServerHandshakeProtocol(String user,String userinfo)throws RSAAuthenticationException
     {
+        /**
+         * msg=!login +user +userinfo   +Base64(clientchallenge) 
+         * return RSA(msg)
+         */
+        
         try {
-            
+            if((user==null)||(userinfo==null))
+                throw new RSAAuthenticationException("Invalid Arguments.");
+            else if( ((user.split(" ").length)==1) || ((userinfo.split(" ").length)==1) )
+                 throw new RSAAuthenticationException("Invalid Arguments.");
             String message = "!login"+" "+user+" "+userinfo+" ";
             byte[] encrypted=null;
+            logger.info("Send Client Challenge: "+new String(clientChallenge));
             //encode Client Challenge with Base64 and add it to message
             byte[] Base64ClientChallenge=Base64Encoder.encodeBase64(this.clientChallenge);
-            message+=Base64ClientChallenge;
+            message+=(new String(Base64ClientChallenge));
            
             encrypted=c1.doFinal(message.getBytes());
       
             return encrypted;
             
         } catch (IllegalBlockSizeException ex) {
-            throw new RSAAuthenticationException("createRequestHandshakeProtocol:IllegalBlockSizeException:"+ex.getMessage());
+            throw new RSAAuthenticationException("ClientToServerHandshakeProtocol:IllegalBlockSizeException:"+ex.getMessage());
         } catch (BadPaddingException ex) {
-            throw new RSAAuthenticationException("createRequestHandshakeProtocol:BadPaddingException:"+ex.getMessage());
+            throw new RSAAuthenticationException("ClientToServerHandshakeProtocol:BadPaddingException:"+ex.getMessage());
         }catch(Exception ex)
         {
-            throw new RSAAuthenticationException("createRequestHandshakeProtocol:Exception:"+ex.getMessage());
+            throw new RSAAuthenticationException("ClientToServerHandshakeProtocol:Exception:"+ex.getMessage());
         }
     }
     
-    public void analyzeAnswerHandshakeProtocol()
+    public boolean FromServerToClientHandshakeProtocol(byte[] encrypted)throws RSAAuthenticationException
     {
-        
+        /**
+             * msg=RSA(!ok +Base64(clientchallenge)+Base64(serverchallenge)
+             *         +Base64(SecretKey)      +Base64(IV parameter) ) 
+             * 
+             * */
+        try {
+            //decrypt RSA
+            String[] msg=(new String(c2.doFinal(encrypted))).split(" ");
+            if(msg[0].contains("!ok")&&(msg.length==5))
+            {
+               //get clientchallenge and compare with own challenge
+                byte[] tmp=Base64Encoder.decodeBase64(msg[1].getBytes());
+                if(!this.compareChallenges(tmp, clientChallenge))
+                {
+                    logger.error("clientChallenge from Server does not correspond to our challenge.");
+                    return false;
+                }
+                
+                //get serverchallenge
+                this.serverChallenge=Base64Encoder.decodeBase64(msg[2].getBytes());
+                
+                //get session keypair
+                //get SecretKey
+                tmp=Base64Encoder.decodeBase64(msg[3].getBytes());
+                this.Secretkey=new SecretKeySpec(tmp,"AES");
+                //get IV Parameter
+                this.IVParameter=Base64Encoder.decodeBase64(msg[4].getBytes());
+                
+            }else
+                return false;    
+            
+            
+        } catch (IllegalBlockSizeException ex) {
+            
+            throw new RSAAuthenticationException("ClientToServerHandshakeProtocol:Exception:"+ex.getMessage());
+        } catch (BadPaddingException ex) {
+            throw new RSAAuthenticationException("ClientToServerHandshakeProtocol:Exception:"+ex.getMessage());
+        }
+ 
+        return true;
     }
     
     
