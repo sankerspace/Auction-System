@@ -108,4 +108,20 @@ public class RSAAuthenticationTest {
         System.out.println("Server Private Key:");
         System.out.println(result);
     }
+    
+    @Test
+    public void testServerClientRSAAuthentication() throws Exception {
+        System.out.println("Client sends first authenticationMessage to Server.");
+        this.outputPipe.write((new String("23456\n")).getBytes());
+        RSAServer server = new RSAServer("auction-server",ClientkeyDirectory,
+                ServerkeyDirectory);
+        
+        this.outputPipe.write((new String("12345\n")).getBytes());
+        RSAClient client = new RSAClient("alice","auction-server",ClientkeyDirectory,
+                ServerkeyDirectory);
+      
+        
+    }
+    
+    
 }
