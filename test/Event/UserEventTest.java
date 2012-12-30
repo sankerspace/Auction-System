@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package Event;
 
 import org.junit.After;
@@ -43,7 +39,6 @@ public class UserEventTest {
      public void testConstructor() {
          System.out.println("\n");
         UserEvent instance = new UserEvent("Marko",UserEvent.UserEventType.USER_DISCONNECTED);
-        // TODO review the generated test code and remove the default call to fail.
         System.out.println("test UserEvent Construktor ");
         System.out.println("Event:getID:"+instance.getID());
         System.out.println("Event:getType:"+instance.getType());
@@ -55,13 +50,11 @@ public class UserEventTest {
     @Test
     public void testCopyConstructor() {
         System.out.println("\n");
-        // TODO review the generated test code and remove the default call to fail.
         System.out.println("test UserEvent CopyConstruktor");
         UserEvent tocopy=new UserEvent("Alice",UserEvent.UserEventType.USER_LOGIN);
         UserEvent instance=new UserEvent(tocopy);
         System.out.println("Event:getID:"+instance.getID());
-        System.out.println("Event:getType:"+instance.getType());
-       
+        System.out.println("Event:getType:"+instance.getType());       
         System.out.println("UserEvent:getUserName:"+instance.getUserName()); 
      
     }

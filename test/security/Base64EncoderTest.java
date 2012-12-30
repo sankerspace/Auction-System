@@ -1,15 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -63,9 +59,5 @@ public class Base64EncoderTest {
         String decodedText=new String(result);
         System.out.println("Decoded Text: "+decodedText);
         assertArrayEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-       
     }
-
-    
 }

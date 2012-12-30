@@ -5,17 +5,15 @@
 package LoadTest;
 
 import auctionmanagement.Auction;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
 
 /**
  *
@@ -102,7 +100,6 @@ public class ParseClientInputTest {
         
     }
     
-   
     @Test
     public void testParseList() {
         System.out.println("parseList");
@@ -113,7 +110,6 @@ public class ParseClientInputTest {
         expResult.remove(this.numberAuctions/2);
         HashMap result = ParseClientInput.parseList(message, clientOwner);
         assertTrue(compareMaps(expResult, result));
-        // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
 }

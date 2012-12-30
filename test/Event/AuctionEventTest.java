@@ -44,7 +44,6 @@ public class AuctionEventTest {
     public void testSomeMethod() {
         System.out.println("\n");
         AuctionEvent instance = new AuctionEvent(AuctionEvent.AuctionType.AUCTION_STARTED,1);
-        // TODO review the generated test code and remove the default call to fail.
         System.out.println("test AuctionEvent Construktor ");
         System.out.println("getID:"+instance.getID());
         System.out.println("getType:"+instance.getType());
@@ -55,7 +54,6 @@ public class AuctionEventTest {
     @Test
     public void testCopy() {
         System.out.println("\n");
-        // TODO review the generated test code and remove the default call to fail.
         System.out.println("test AuctionEvent CopyConstruktor");
         AuctionEvent tocopy=new AuctionEvent(AuctionEvent.AuctionType.AUCTION_ENDED,3);
         AuctionEvent instance=new AuctionEvent(tocopy);

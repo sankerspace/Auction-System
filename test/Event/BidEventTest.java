@@ -39,7 +39,6 @@ public class BidEventTest {
      public void testSomeMethod() {
          System.out.println("\n");
         BidEvent instance = new BidEvent("Marko",2,44,BidEvent.BidEventType.BID_OVERBID);
-        // TODO review the generated test code and remove the default call to fail.
         System.out.println("test BidEvent Construktor ");
         System.out.println("Event:getID:"+instance.getID());
         System.out.println("Event:getType:"+instance.getType());
@@ -50,7 +49,6 @@ public class BidEventTest {
     @Test
     public void testCopy() {
         System.out.println("\n");
-        // TODO review the generated test code and remove the default call to fail.
         System.out.println("test BidEvent CopyConstruktor");
         BidEvent tocopy=new BidEvent("Alice",0,300.34,BidEvent.BidEventType.BID_WON);
         BidEvent instance=new BidEvent(tocopy);
