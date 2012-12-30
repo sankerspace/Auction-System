@@ -65,10 +65,8 @@ public class HMAC {
     
     private Key getKey(String path) {
         try {
-            FileInputStream fis = null;
-            String pathToKey = path;
+            FileInputStream fis = new FileInputStream(path);
             byte[] keyBytes = new byte[1024];
-            fis = new FileInputStream(pathToKey);
             fis.read(keyBytes);
             fis.close();
             byte[] input = Hex.decode(keyBytes);
