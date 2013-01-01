@@ -16,6 +16,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import utils.EasySecure;
 
 /**
  *
@@ -47,9 +48,9 @@ import javax.crypto.SecretKey;
             this.servername=servername;
             
             try {
-                
-                File privateServerKeyFile = new File(this.ServerKeydirectory.getPath()+File.pathSeparator+
-                    servername+".pem");
+                String path=this.ServerKeydirectory.getPath()+File.separator
+                        +servername+".pem";               
+                File privateServerKeyFile = new File(path);
                 privateKeyServer=this.getPrivateKey(privateServerKeyFile.getPath());
                 logger.info("Initialized server private key.");
                 
@@ -79,8 +80,9 @@ import javax.crypto.SecretKey;
         {
             try {
                logger.info("Find Public Key of user "+user); 
-               File publicClientKeyFile = new File(this.ClientKeydirectory.getPath()
-                       +File.pathSeparator+user+".pub.pem");
+               String path=this.ClientKeydirectory.getPath()+File.separator
+                       +user+".pub.pem";
+               File publicClientKeyFile = new File(path);
                publicKeyClient=this.getPublicKey(publicClientKeyFile.getPath());
                logger.info("Initialized client public key.");
                if(publicKeyClient!=null)
@@ -110,6 +112,8 @@ import javax.crypto.SecretKey;
                 
             } catch (NoSuchAlgorithmException ex) {
                 throw new RSAAuthenticationException("NoSuchAlgorithmException:"+ex.getMessage());
+            } catch (Exception ex) {
+                throw new RSAAuthenticationException("Exception:"+ex.getMessage());
             }
         
         }
@@ -144,6 +148,7 @@ import javax.crypto.SecretKey;
                        this.setUser(msg[1]);                
                        logger.debug("User "+this.clientname+" requested connection.");
                        int counter=2;
+                       this.userinfo=msg[counter++];
                        while(counter < (msg.length-1))
                        {
                            this.userinfo+=msg[counter];
@@ -154,7 +159,7 @@ import javax.crypto.SecretKey;
                        byte[] challengeClient=msg[(msg.length-1)].getBytes();
                        
                        this.clientChallenge=Base64Encoder.decodeBase64(challengeClient);
-                       logger.info("received Client Challenge: "+new String(clientChallenge));
+                       logger.debug("received Client Challenge: "+EasySecure.convertBytetoStringofDigits(clientChallenge));
 
                     }else
                         return false;
@@ -205,6 +210,7 @@ import javax.crypto.SecretKey;
             msg+=new String(Base64Encoder.encodeBase64(this.IVParameter));
             //last argument in the message
             byte[] encrypted=null;
+            byte[] Base64andencrypted=null;
             try {
                 encrypted=this.c1.doFinal(msg.getBytes());
             } catch (IllegalBlockSizeException ex) {
@@ -213,7 +219,13 @@ import javax.crypto.SecretKey;
                 throw new RSAAuthenticationException("ServerToClientHandshakeProtocol:createSessionKey:"+ex.getMessage());
             }
             //encode base64 and return
-            return Base64Encoder.encodeBase64(encrypted);
+            Base64andencrypted=Base64Encoder.encodeBase64(encrypted);
+            logger.debug("Summary of the Second HANDSHAKEPROTOCOLL message created on Server side:");
+            logger.debug("ClientChallenge:"+EasySecure.convertBytetoStringofDigits(clientChallenge));
+            logger.debug("ServerChallenge:"+EasySecure.convertBytetoStringofDigits(serverChallenge));
+            logger.debug("SecretKey:"+EasySecure.convertBytetoStringofDigits(Secretkey.getEncoded()));
+            logger.debug("IVParameter:"+EasySecure.convertBytetoStringofDigits(IVParameter));
+            return Base64andencrypted;
         }
         
         public boolean HandshakeProtocolMessageThreeHandle(byte[] encrypted)throws RSAAuthenticationException
@@ -224,18 +236,20 @@ import javax.crypto.SecretKey;
              * 
              */
             //Base64 decode
-            byte[] tmp= Base64Encoder.decodeBase64(encrypted);
+            
             byte[] challenge=null;
+            byte[] tmp=null;
             try {
                 //create AES object to decode message and for further commmunication
                 aes=new AES(this.Secretkey,this.IVParameter);
                 //decrypt AES and decode base64
-                challenge=aes.decrypt(tmp);
-                
+                tmp=aes.decrypt(encrypted);
+                challenge= Base64Encoder.decodeBase64(tmp);
             } catch (AESException ex) {
                throw new RSAAuthenticationException("AESException:"+ex.getMessage());
             }
-            
+            logger.debug("Summary of the Third HANDSHAKEPROTOCOLL message send from CLIENT");
+            logger.debug("ServerChallenge:"+EasySecure.convertBytetoStringofDigits(challenge));
             return compareChallenges(challenge, this.serverChallenge);
         
         }

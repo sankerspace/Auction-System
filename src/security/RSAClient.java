@@ -14,6 +14,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
+import utils.EasySecure;
 
 /**
  *
@@ -43,12 +44,12 @@ public class RSAClient extends RSAAuthentication{
        
         try {
 
-            File publicServerKeyFile = new File(this.ServerKeydirectory.getPath()+File.pathSeparator+
-                servername+".pub.pem");
+            String path = this.ServerKeydirectory.getPath()+File.separator+servername+".pub.pem";
+            File publicServerKeyFile = new File(path);
             publicKeyServer=this.getPublicKey(publicServerKeyFile.getPath());
-
-             File privateClientKeyFile = new File(this.ClientKeydirectory.getPath()+File.pathSeparator+
-                user+".pem");
+            
+            String path_second=this.ClientKeydirectory.getPath()+File.separator+user+".pem";
+             File privateClientKeyFile = new File(path_second);
             privateKeyClient=this.getPrivateKey(privateClientKeyFile.getPath());
 
 
@@ -88,15 +89,23 @@ public class RSAClient extends RSAAuthentication{
          * msg=!login +user +userinfo   +Base64(clientchallenge) 
          * return Base64(RSA(msg))
          */
-        
+        String[] s1=null,s2=null;
         try {
             if((user==null)||(userinfo==null))
                 throw new RSAAuthenticationException("Invalid Arguments.");
-            else if( ((user.split(" ").length)==1) || ((userinfo.split(" ").length)==1) )
+            else if( (((s1=user.split(" ")).length)>1) || (((s2=userinfo.split(" ")).length)<1))
+            {
+                throw new RSAAuthenticationException("Invalid Arguments.");
+                
+            }else if( (s1[0].length()==0) || (s2[0].length()==0))
+            {
                  throw new RSAAuthenticationException("Invalid Arguments.");
+            }
             String message = "!login"+" "+user+" "+userinfo+" ";
             byte[] encrypted=null;
-            logger.info("Send Client Challenge: "+new String(clientChallenge));
+            //for debug purpose
+            
+            logger.debug("Send Client Challenge: "+EasySecure.convertBytetoStringofDigits(clientChallenge));
             //encode Client Challenge with Base64 and add it to message
             byte[] Base64ClientChallenge=Base64Encoder.encodeBase64(this.clientChallenge);
             message+=(new String(Base64ClientChallenge));
@@ -148,6 +157,12 @@ public class RSAClient extends RSAAuthentication{
                 //get IV Parameter
                 this.IVParameter=Base64Encoder.decodeBase64(msg[4].getBytes());
                 
+            logger.debug("Summary of the Second HANDSHAKEPROTOCOLL message received on CLIENT side");
+            logger.debug("ClientChallenge:"+EasySecure.convertBytetoStringofDigits(clientChallenge));
+            logger.debug("ServerChallenge:"+EasySecure.convertBytetoStringofDigits(serverChallenge));
+            logger.debug("SecretKey:"+EasySecure.convertBytetoStringofDigits(Secretkey.getEncoded()));
+            logger.debug("IVParameter:"+EasySecure.convertBytetoStringofDigits(IVParameter));
+                
             }else
                 return false;    
             
@@ -186,6 +201,8 @@ public class RSAClient extends RSAAuthentication{
              throw new RSAAuthenticationException("AESException:"+ex.getMessage());
         }
         
+        logger.debug("Summary of the Third HANDSHAKEPROTOCOLL message send from CLIENT");
+        logger.debug("ServerChallenge:"+EasySecure.convertBytetoStringofDigits(serverChallenge));
         return tmp;
         
     } 
