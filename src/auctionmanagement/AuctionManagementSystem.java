@@ -65,7 +65,7 @@ public class AuctionManagementSystem implements Runnable {
     }
 
     //public ----------------------------------------- 
-    public AuctionManagementSystem(String analyticBinding, String billingBinding,LinkedBlockingQueue<CommandTask> incomingrequest, ExecutorService pool, Log output) {
+    public AuctionManagementSystem(String analyticBinding, String billingBinding, LinkedBlockingQueue<CommandTask> incomingrequest, ExecutorService pool, Log output) {
         this.pool = pool;
         this.logger = output;
         this.incomingrequest = incomingrequest;
@@ -100,9 +100,9 @@ public class AuctionManagementSystem implements Runnable {
                 try {
 
                     billing = registry.getBillingInterface(billingBinding);
-                    bss= registry.getBillingInterface(billingBinding).login("auctionServer", "44");
-                    if(bss != null){
-                            logger.output("AuctionManagementSystem:RMI: bss aviable",2);
+                    bss = registry.getBillingInterface(billingBinding).login("auctionServer", "44");
+                    if (bss != null) {
+                        logger.output("AuctionManagementSystem:RMI: bss aviable", 2);
 
                     } else {
                         logger.output("AuctionManagementSystem:RMI: No BillingInterface aviable");
@@ -207,7 +207,7 @@ public class AuctionManagementSystem implements Runnable {
                                     + "\nUser:" + auc.getHighestBidder()
                                     + "\nPrice:" + auc.getHighestBid()
                                     + "\nType:BID_WON", 3);
-                        }                      
+                        }
                         //AUCTION_ENDED                        
                         AuctionEvent auctionevent = new AuctionEvent(
                                 AuctionEvent.AuctionType.AUCTION_ENDED,
@@ -218,7 +218,7 @@ public class AuctionManagementSystem implements Runnable {
                                 + ":processEvent:Invoke::"
                                 + "AuctionID:" + auc.getID() + "\n"
                                 + "Type:AUCTION_ENDED", 3);
-                        
+
                         //rmiAnalyticsAvaible
                     }
 
@@ -227,7 +227,7 @@ public class AuctionManagementSystem implements Runnable {
                         /*BillingServer RMI Method Invocation*/
                         logger.output("rmiBilling Aviable, billAuction to happen soon.", 2);
 
-                        if(bss != null){
+                        if (bss != null) {
                             bss.billAuction(auc.getOwner(), auc.getID(), auc.getHighestBid());
 
                         } else {
@@ -329,7 +329,7 @@ public class AuctionManagementSystem implements Runnable {
                         }
 
                         list.setCharAt(list.length() - 1, ' ');
-                        
+
                     }
                     Answer a = new Answer(list.toString(), this.commandtask.list.client);
                     outgoingmessagechannel.offer(a);
@@ -337,6 +337,16 @@ public class AuctionManagementSystem implements Runnable {
                     logger.output("AMSHandlerThread:list:Exception:" + e.getMessage());
                 }
 
+            } else if (this.commandtask.clientList != null) {  //FEATURE Stage4:getClientList
+                logger.output("AMSHandlerThread:clientList");
+                try {
+                    //TODO Stage4:find list of clients in a server class and implement it here, ask marco how to get this list
+                    String clientList = "Bob:<ip-adress>\nAlice:<ip-adress>"; //placeholder
+                    Answer a = new Answer(clientList, this.commandtask.clientList.client);
+                    outgoingmessagechannel.offer(a);
+                } catch (Exception e) {
+                    logger.output("AMSHandlerThread:clientList:Exception:" + e.getMessage());
+                }
             } else if (this.commandtask.login != null) {
                 Account debug = null;
                 try {
@@ -459,7 +469,7 @@ public class AuctionManagementSystem implements Runnable {
                                     userevent.setTime(time);
                                     logger.output("RMI:logout:Login time of "
                                             + ac.getName()
-                                            + " is " + time + " ms.",3);
+                                            + " is " + time + " ms.", 3);
                                     analytic.processEvents(userevent);
                                     logger.output("AMSHandlerThread:logout:RMI"
                                             + ":processEvent:Invoke::"
@@ -660,7 +670,7 @@ public class AuctionManagementSystem implements Runnable {
                                 + " " + commandtask.bid.amount + " "
                                 + "on" + " '" + auc.getDescription() + "'."
                                 + " Current highest bid is" + " "
-                                + auc.getHighestBid()+ "." );
+                                + auc.getHighestBid() + ".");
 
                         Answer a = new Answer(ans, commandtask.bid.client);
                         outgoingmessagechannel.offer(a);
@@ -708,7 +718,7 @@ public class AuctionManagementSystem implements Runnable {
                                             userevent.setTime(time);
                                             logger.output("RMI:logout:Login time of "
                                                     + auc.getName()
-                                                    + " is " + time + " ms.",2);
+                                                    + " is " + time + " ms.", 2);
                                             analytic.processEvents(userevent);
 
                                             logger.output("AMSHandlerThread:end:RMI"
