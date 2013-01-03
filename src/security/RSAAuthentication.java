@@ -142,7 +142,9 @@ public class RSAAuthentication {
                         }
                         array = line.toCharArray();
                     } catch (IOException ex) {
-                       
+                       log.error(ex.getMessage());
+                    }catch (Exception ex) {
+                        log.error(ex.getMessage());
                     }finally
                     {
                         try {

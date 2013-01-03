@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.PrintWriter;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Scanner;
@@ -28,23 +29,11 @@ public class RSAAuthenticationTest {
     private String ServerkeyDirectory=null; 
     private String ClientkeyDirectory=null;
     public static InputStream stdin=System.in;
-    private PipedInputStream inputPipe=null;
-    private PipedOutputStream outputPipe=null;
+    
    // ByteArrayInputStream stream
     public RSAAuthenticationTest() throws IOException {
         ServerkeyDirectory="./keys/Server/";
         ClientkeyDirectory="./keys/Clients/";
-        
-        
-        //String data = "23456\n";
-        //ByteArrayInputStream stream=new ByteArrayInputStream(data.getBytes());
-        inputPipe=new PipedInputStream();
-        System.setIn(inputPipe);
-        outputPipe=new PipedOutputStream(inputPipe);
-        //System.setIn(new ByteArrayInputStream(data.getBytes()));
-        //Scanner scanner = new Scanner(System.in);
-        //System.out.println(scanner.nextLine());
-        
     }
     
     @BeforeClass
@@ -54,6 +43,8 @@ public class RSAAuthenticationTest {
     @AfterClass
     public static void tearDownClass() {
         System.setIn(stdin);
+        
+        
     }
     
     @Before
@@ -62,8 +53,7 @@ public class RSAAuthenticationTest {
     
     @After
     public void tearDown() throws IOException {
-        this.outputPipe.close();
-        this.inputPipe.close();
+       
        
     }
 
@@ -92,13 +82,20 @@ public class RSAAuthenticationTest {
      */
     @Test
     public void testServerGetPrivateKey() throws Exception {
+      
+        PipedInputStream inputPipe=new PipedInputStream();
+        PipedOutputStream outputPipe=new PipedOutputStream(inputPipe);
+        System.setIn(inputPipe);
+        PrintWriter print=new PrintWriter(outputPipe,true);
+        
+        
         System.out.println("getPrivateKey from Server");
         RSAAuthentication instance = new RSAAuthentication(ClientkeyDirectory,
                 ServerkeyDirectory);
         String file = instance.getServerKeyDirectorypath()+"/auction-server.pem";
         PrivateKey expResult = null;
         
-        this.outputPipe.write((new String("23456\n")).getBytes());
+        print.println("23456");print.flush();
         PrivateKey result = instance.getPrivateKey(file);
         //assertEquals(expResult, result);
         //fail("The test case is a prototype.");
@@ -106,20 +103,5 @@ public class RSAAuthenticationTest {
         System.out.println("Server Private Key:");
         System.out.println(result);
     }
-    
-    @Test
-    public void testServerClientRSAAuthentication() throws Exception {
-        System.out.println("Client sends first authenticationMessage to Server.");
-        this.outputPipe.write((new String("23456\n")).getBytes());
-        RSAServer server = new RSAServer("auction-server",ClientkeyDirectory,
-                ServerkeyDirectory);
-        
-        this.outputPipe.write((new String("12345\n")).getBytes());
-        RSAClient client = new RSAClient("alice","auction-server",ClientkeyDirectory,
-                ServerkeyDirectory);
-      
-        
-    }
-    
-    
+  
 }
