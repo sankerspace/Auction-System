@@ -336,13 +336,22 @@ public class AuctionManagementSystem implements Runnable {
                 } catch (Exception e) {
                     logger.output("AMSHandlerThread:list:Exception:" + e.getMessage());
                 }
-
-            } else if (this.commandtask.clientList != null) {  //FEATURE Stage4:getClientList
+            } else if (this.commandtask.clientList != null) {
                 logger.output("AMSHandlerThread:clientList");
                 try {
-                    //TODO Stage4:find list of clients in a server class and implement it here, ask marco how to get this list
-                    String clientList = "Bob:<ip-adress>\nAlice:<ip-adress>"; //placeholder
-                    Answer a = new Answer(clientList, this.commandtask.clientList.client);
+                    //TODO Stage4:test this block
+                    StringBuffer clientList = new StringBuffer();
+                    Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
+                    if (iterator.hasNext()) {
+                        while (iterator.hasNext()) {
+                            Map.Entry<String, Account> entry = iterator.next();
+                            clientList.append(entry.getKey().toString() + "." + " '"
+                                    + entry.getValue().getName() + "' "
+                                    + entry.getValue().getClient().getDestinationHost() + "\n");
+                        }
+                        clientList.setCharAt(clientList.length() - 1, ' ');
+                    }
+                    Answer a = new Answer(clientList.toString(), this.commandtask.clientList.client);
                     outgoingmessagechannel.offer(a);
                 } catch (Exception e) {
                     logger.output("AMSHandlerThread:clientList:Exception:" + e.getMessage());
@@ -374,6 +383,23 @@ public class AuctionManagementSystem implements Runnable {
                                         analytic.processEvents(
                                                 new UserEvent(commandtask.login.user,
                                                 UserEvent.UserEventType.USER_LOGIN));
+
+                                        //TODO Stage4:test this block
+                                        StringBuffer clientList = new StringBuffer();
+                                        Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
+                                        if (iterator.hasNext()) {
+                                            while (iterator.hasNext()) {
+                                                Map.Entry<String, Account> entry = iterator.next();
+                                                clientList.append(entry.getKey().toString() + "." + " '"
+                                                        + entry.getValue().getName() + "' "
+                                                        + entry.getValue().getClient().getDestinationHost() + "\n");
+                                            }
+                                            clientList.setCharAt(clientList.length() - 1, ' ');
+                                        }
+
+                                        //TODO add client list(account_map) to client class
+                                        //Client.setAviableClientsList(account_map), ask marco how to do that exactly
+
                                         logger.output("AMSHandlerThread:login:RMI"
                                                 + ":processEvent:Invoke::"
                                                 + "\nUser:" + commandtask.login.user, 3);
@@ -418,6 +444,23 @@ public class AuctionManagementSystem implements Runnable {
                                     analytic.processEvents(
                                             new UserEvent(commandtask.login.user,
                                             UserEvent.UserEventType.USER_LOGIN));
+
+                                    //TODO Stage4:test this block
+                                    StringBuffer clientList = new StringBuffer();
+                                    Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
+                                    if (iterator.hasNext()) {
+                                        while (iterator.hasNext()) {
+                                            Map.Entry<String, Account> entry = iterator.next();
+                                            clientList.append(entry.getKey().toString() + "." + " '"
+                                                    + entry.getValue().getName() + "' "
+                                                    + entry.getValue().getClient().getDestinationHost() + "\n");
+                                        }
+                                        clientList.setCharAt(clientList.length() - 1, ' ');
+                                    }
+
+                                    //TODO add client list(account_map) to client class
+                                    //Client.setAviableClientsList(account_map), ask marco how to do that exactly
+
                                     logger.output("AMSHandlerThread:login:RMI"
                                             + ":processEvent:Invoke::"
                                             + "\nUser:" + commandtask.login.user, 3);
@@ -531,9 +574,27 @@ public class AuctionManagementSystem implements Runnable {
                         } catch (RemoteException e) {
                             logger.output("AMS_HandlerThread:RMI:create:RemoteException"
                                     + ":" + e.getMessage(), 2);
+                            /*
+                             * BEGIN Stage4:startProcess()
+                             */
+                            
+                            //TODO Stage4:ask marco, right place to start server outage? needs to be tested
+                            startOutageProcess();
+                            /*
+                             * END Stage4:startProcess()
+                             */
                         } catch (NullPointerException e) {
                             logger.output("AMS_HandlerThread:create:RMI:NullPointerException"
                                     + ":" + e.getMessage(), 2);
+                                                        /*
+                             * BEGIN Stage4:startProcess()
+                             */
+                            
+                            //TODO Stage4:ask marco, right place to start server outage? needs to be tested
+                            
+                            /*
+                             * END Stage4:startProcess()
+                             */
                         }
 
 
@@ -754,6 +815,20 @@ public class AuctionManagementSystem implements Runnable {
                 }
             }
             logger.output("AMS_HandlerThread finished", 2);
+        }
+
+        /*
+         * Stage4:startProcess
+         * TODO Stage4:startOutageProcess method needs to be tested
+         */
+        private void startOutageProcess() {
+            /*
+             * 1. Select two random clients from client list
+             */
+            
+            /*
+             * 2. Create two timestamps and use !getTimeStamp
+             */
         }
     }
 }

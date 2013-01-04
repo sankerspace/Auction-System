@@ -15,7 +15,7 @@ public class CommandTask {
     Logout logout = null;
     Bid bid = null;
     End end = null;
-    ClientList clientList = null; //FEATURE Stage4:getClientList
+    ClientList clientList = null;
 
     public CommandTask(List list) {
         this.list = list;
@@ -64,7 +64,7 @@ public class CommandTask {
         public ClientList(Client client) {
             this.client = client;
             StrRepr = new StringBuffer("ClientList:client:host" + this.client.getDestinationHost()
-                    + "\nList:client:port:" + this.client.getDestinationPort());
+                    + "\nClientList:client:port:" + this.client.getDestinationPort());
         }
 
         public String toString() {

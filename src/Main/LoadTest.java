@@ -1,3 +1,5 @@
+package Main;
+
 
 import MyLogger.Log;
 import auctionmanagement.AuctionClientException;

@@ -1,23 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package auctionmanagement;
 
-import communication.OperationException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import MyLogger.Log;
 import communication.Client;
 import communication.ClientException;
 import communication.Operation;
+import communication.OperationException;
 import communication.ServerUDP;
-import communication.ServerUDPException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
-import MyLogger.Log;
-import auctionmanagement.CheckRequest.checkAuctionAnswer;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -108,7 +101,7 @@ public class AuctionClient {
                             req.setUdpPort(this.udpPort);
                         } else if (!req.getCommandName().contains("!list")) {
                             throw (new RequestException("You must be logged in!\n>"));
-                        } else if (!req.getCommandName().contains("!getClientList")) {  //FEATURE Stage4:getClientList
+                        } else if (!req.getCommandName().contains("!getClientList")) {  //TODO Stage4:test this line
                             throw (new RequestException("You must be logged in!\n>"));
                         }
                     } else {
