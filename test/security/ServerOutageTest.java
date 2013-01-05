@@ -20,22 +20,7 @@ public class ServerOutageTest {
 
     @BeforeClass
     public static void setUpClass() {
-        /*
-         * Init BillingServer
-         */
-        BillingServer billingserver = new BillingServer();
-
-        /*
-         * Init AuctionServer
-         */
-        AuctionServer auctionserver = new AuctionServer();
-
-        /*
-         * Init Clients
-         */
-        AuctionClient auctionClient1 = new AuctionClient();
-        AuctionClient auctionClient2 = new AuctionClient();
-        AuctionClient auctionClient3 = new AuctionClient();
+       
     }
 
     @AfterClass
@@ -58,7 +43,20 @@ public class ServerOutageTest {
         /*
          * 1. Create 3 new clients and servers
          */
+
+        /*
+         * Init AuctionServer
+         */
+        AuctionServer auctionserver = new AuctionServer();
+
+        /*
+         * Init Clients
+         */
+        AuctionClient auctionClient1 = new AuctionClient();
+        AuctionClient auctionClient2 = new AuctionClient();
+        AuctionClient auctionClient3 = new AuctionClient();
         
+     //   auctionClient1.
         /*
          * 2. Use command !getClientList with one of the clients (interactive)
          * Save in list one.
