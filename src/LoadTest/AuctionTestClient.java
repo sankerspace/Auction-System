@@ -8,7 +8,7 @@ import MyLogger.Log;
 import auctionmanagement.Auction;
 import communication.Client;
 import communication.ClientException;
-import communication.Operation;
+import communication.OperationTCP;
 import communication.OperationException;
 import java.util.HashMap;
 import java.util.Timer;
@@ -110,7 +110,7 @@ public class AuctionTestClient implements Runnable {
                     );
             /**********************Login*******************/
             //start registration of the client at the AuctionServer
-            Operation op = new Operation(this.clientTCP);
+            OperationTCP op = new OperationTCP(this.clientTCP);
             //udpPort will be set to a fake
             op.writeString("!login" +" "+("client"+id)+" "+0);//udpPort=0
             if(!ParseClientInput.parseLogin(this.messaging.take()))
@@ -190,9 +190,9 @@ public class AuctionTestClient implements Runnable {
 
         public void run() {
             String msg = null;
-            Operation op = null;
+            OperationTCP op = null;
             try {
-                op = new Operation(this.client);
+                op = new OperationTCP(this.client);
             } catch (OperationException ex) {
                 out.output("AuctionClientTCPHandlerThread " + id + ": OperationException");
                 Thread.currentThread().interrupt();

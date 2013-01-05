@@ -4,7 +4,12 @@
  */
 package security;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -40,6 +45,7 @@ import utils.EasySecure;
         private PrivateKey  privateKeyServer=null;
         private String      userinfo=null;
         final private int KEYSIZE=256;//Keysize of the secret Key for AES Cipher
+        private String lastReceivedMessage=null;
         
         public RSAServer(String servername,String ClientKeyDirectory
             ,String ServerKeyDirectory)throws RSAAuthenticationException
@@ -76,7 +82,7 @@ import utils.EasySecure;
         }
         
         
-        public void setUser(String user)throws RSAAuthenticationException
+        private void setUser(String user)throws RSAAuthenticationException
         {
             try {
                logger.info("Find Public Key of user "+user); 
@@ -99,7 +105,7 @@ import utils.EasySecure;
             }
         }
         //Session key contains two keys-Secret Key and IV byte array
-        public void createSessionKey()throws RSAAuthenticationException
+        private void createSessionKey()throws RSAAuthenticationException
         {
             try { 
                 //create SecretKey
@@ -228,6 +234,7 @@ import utils.EasySecure;
             return Base64andencrypted;
         }
         
+        
         public boolean HandshakeProtocolMessageThreeHandle(byte[] encrypted)throws RSAAuthenticationException
         {
             /**
@@ -252,6 +259,70 @@ import utils.EasySecure;
             logger.debug("ServerChallenge:"+EasySecure.convertBytetoStringofDigits(challenge));
             return compareChallenges(challenge, this.serverChallenge);
         
+        }
+        
+        public void startServerAuthenticationProcedure(InputStream in,OutputStream out) throws RSAAuthenticationException
+        {
+            
+             
+            DataOutputStream w = new DataOutputStream(out);
+            DataInputStream r = new DataInputStream(in);
+            String send=null,read=null,error=this.getErrorMessage();
+            boolean b;
+            try {
+                
+                //first message read
+                read=r.readUTF();
+                this.lastReceivedMessage=new String(read);
+                byte[] firstmessage=read.getBytes();
+                b=this.HandshakeProtocolMessageOneHandle(firstmessage);
+                if( !b )
+                    throw new RSAAuthenticationException("Authentication failed.");
+               
+
+
+                //second message send
+                byte[] secondmessage = this.HandshakeProtocolMessageTwoCreate();
+                send=new String(secondmessage);
+                w.writeUTF(send);
+
+
+
+                //third message receive
+                read=r.readUTF();
+                this.lastReceivedMessage=new String(read);
+                if(read.contains(error))
+                    throw new RSAAuthenticationException("Authentication failed at Client side.");
+                byte[] thirdmessage=read.getBytes();
+                b=this.HandshakeProtocolMessageThreeHandle(thirdmessage);
+                if( !b )
+                    throw new RSAAuthenticationException("Authentication failed.");
+
+
+            } catch (RSAAuthenticationException ex) {
+                try {
+                    w.writeUTF(error);
+                } catch (IOException ex1) {  }
+               throw new RSAAuthenticationException(ex.getMessage());
+            } catch (IOException ex) {
+                try {
+                    w.writeUTF(error);
+                } catch (IOException ex1) {  }
+               throw new RSAAuthenticationException("IOException:"+ex.getMessage());
+            }catch(Exception ex)
+            {
+                try {
+                    w.writeUTF(error);
+                } catch (IOException ex1) { }
+                throw new RSAAuthenticationException("Exception:"+ex.getMessage());
+            }
+
+            
+        }
+        
+        public String getLastMessage()
+        {
+            return this.lastReceivedMessage;
         }
         
         

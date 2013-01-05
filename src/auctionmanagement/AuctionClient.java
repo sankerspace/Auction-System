@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import communication.Client;
 import communication.ClientException;
-import communication.Operation;
+import communication.OperationTCP;
 import communication.ServerUDP;
 import communication.ServerUDPException;
 import java.io.BufferedReader;
@@ -18,7 +18,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import MyLogger.Log;
 import auctionmanagement.CheckRequest.checkAuctionAnswer;
+import communication.Operation;
+import communication.OperationSecure;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
@@ -57,6 +61,8 @@ public class AuctionClient {
            // pool.execute(serverUDP);
             pool.execute(handleTCP);
             
+        } catch (OperationException e) {
+            throw (new AuctionClientException(":OperationException:",e));
         } catch (ClientException e) {
            throw (new AuctionClientException(":ClientException:",e));
       }  /* catch (ServerUDPException e) {
@@ -80,6 +86,8 @@ public class AuctionClient {
             //pool.execute(serverUDP);
             pool.execute(handleTCP);
             
+        } catch (OperationException e) {
+           throw (new AuctionClientException(":OperationException:",e));
         } catch (ClientException e) {
            throw (new AuctionClientException(":ClientException:",e));
         }/* catch (ServerUDPException e) {
@@ -97,7 +105,7 @@ public class AuctionClient {
         String msg;
         this.errorlog.out(">");
         try {
-            Operation op = new Operation(this.clientTCP);
+            OperationTCP op = new OperationTCP(this.clientTCP);
            
             while((line=in.readLine())!=null)
             {
@@ -235,12 +243,16 @@ public class AuctionClient {
         
         private Log out=null;
         private Client client=null;
+        boolean switchToSecureChannel=false;
+        OperationSecure opSecure=null;
+        OperationTCP op=null;
         
-        public AuctionClientTCPHandler(Client client,Log out)
+        public AuctionClientTCPHandler(Client client,Log out) throws OperationException
         {
                 this.out=out;
                 this.client=client;
                 out.output("Constructor:Create AuctionClientTCPHandler", 2);
+                setRegularChannel();
         }
         
         
@@ -248,18 +260,33 @@ public class AuctionClient {
         public void run()
         {
             String msg=null;
-            
-            Operation op=null;
-            
+
             while(!Thread.currentThread().isInterrupted())
             {
                 out.output("AuctionClientTCPHandlerThread is running..", 2);
                 try {
-                    
-                    op  = new Operation(this.client);
-                    msg = op.readString();
-                    out.output(msg);
-                    
+                    if(!switchToSecureChannel)
+                    {
+                        
+                        msg = op.readString();
+                        if(msg.contains("!dummy"))
+                        {
+                            while((opSecure==null))
+                            { 
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException ex) {
+                                   out.output("Wait after dummy messages finished.", 3);
+                                }
+                            }
+                        }else
+                            out.output(msg);
+                        
+                    }else{
+                        msg = opSecure.readString();
+                        out.output(msg);
+                    }
+
                 } catch (OperationException ex) {
                    out.output("AuctionClientTCPHandlerThread: OperationException");
                    Thread.currentThread().interrupt();
@@ -269,6 +296,21 @@ public class AuctionClient {
             out.output("AuctionClientTCPHandlerThread finished..", 2);
             
         } 
+        
+        public void setSecureChannel(Operation op)
+        {
+           this.switchToSecureChannel=true; 
+           this.opSecure=new OperationSecure((OperationSecure)op);
+           this.op=null;
+        }
+        
+        public void setRegularChannel() throws OperationException
+        {
+            this.switchToSecureChannel=false;
+            this.opSecure=null;
+            this.op = new OperationTCP(this.client);
+        }
+        
     }
     
     private class ClientStatus{

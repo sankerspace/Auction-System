@@ -7,8 +7,9 @@ package auctionmanagement;
 import MyLogger.Log;
 import communication.Client;
 import communication.ClientException;
-import communication.Operation;
+import communication.OperationTCP;
 import communication.OperationException;
+import communication.OperationSecure;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -23,12 +24,14 @@ public class AuctionTCPReadHandler implements Runnable{
     private LinkedBlockingQueue<CommandTask> queue=null;
     private Client client=null;
     private Log logger=null;
+    private boolean secureconnectionestablished;
     
     public AuctionTCPReadHandler(LinkedBlockingQueue<CommandTask> queue,Client client,Log logger)
     {
         this.client=client;
         this.queue=queue;
         this.logger=logger;
+        secureconnectionestablished=false;
         logger.output("AuctionTCPReadHandler created....", 2);
     }
     
@@ -90,33 +93,39 @@ public class AuctionTCPReadHandler implements Runnable{
         {
             logger.output("ServerSocketHandleThread started....", 2);
             String message=null;
-            Operation op=null;
+            //OperationTCP op=null;
+            OperationSecure opSec=null;
             CommandTask com=null;
             try {
-                op=new Operation(this.client);
+                //op=new OperationTCP(this.client);
                 
                 while(!Thread.currentThread().isInterrupted())
                 {   
-               
-                    
-                  message=op.readString();
-                  if(message!=null)
+                  if(this.secureconnectionestablished)
                   {
-                      if(message.contains("end"))break;
-                      com = this.ExtractInfo(new Request(this.client,message));               
-                      this.queue.offer(com); 
-                       logger.output("ServerSocketHandleThread received"
-                               +" message and forwarded a CommandTask Object to AMSThread:\n"
-                               +"CommandTask[ServerSocketHandlThread]:"+"\n"
-                               +com.toString(), 3);
+                      //message=op.readString();
+                      if(message!=null)
+                      {
+                          if(message.contains("end"))break;
+                          com = this.ExtractInfo(new Request(this.client,message));               
+                          this.queue.offer(com); 
+                           logger.output("ServerSocketHandleThread received"
+                                   +" message and forwarded a CommandTask Object to AMSThread:\n"
+                                   +"CommandTask[ServerSocketHandlThread]:"+"\n"
+                                   +com.toString(), 3);
+                      }else
+                          logger.output("ServerSocketHandleThread received a null message.");
                   }else
-                      logger.output("ServerSocketHandleThread received a null message.");
+                  {
+                    //opSec= new OperationSecure();
+                  }
+        
+       
+       
 
                 }
-          
-                
-                 
-            }catch (OperationException ex) {
+ 
+           } /*catch (OperationException ex) {
                 
                     CommandTask.End l = new CommandTask.End(this.client);
                     CommandTask c= new CommandTask(l);
@@ -124,7 +133,7 @@ public class AuctionTCPReadHandler implements Runnable{
                     
                    this.logger.output("ServerSocketHandleThread:OperationException:"+ex.getMessage(),2);
                    Thread.currentThread().interrupt();
-             }catch (Exception ex) {
+             }*/catch (Exception ex) {
                 
                    
                    this.logger.output("ServerSocketHandleThread:Exception:"+ex.getMessage());

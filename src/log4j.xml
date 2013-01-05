@@ -63,15 +63,15 @@
 <!-- ************* Package Security ******************************  -->
   <logger name="RSAAuthentication">
     <!-- Print only messages of level warn or above in the package com.foo -->
-    <level value="all"/> 
+    <level value="error"/> 
   </logger>
 <logger name="RSAClient">
     <!-- Print only messages of level warn or above in the package com.foo -->
-    <level value="all"/> 
+    <level value="error"/> 
   </logger>
 <logger name="RSAServer">
     <!-- Print only messages of level warn or above in the package com.foo -->
-    <level value="all"/> 
+    <level value="error"/> 
   </logger>
 
   <root> 

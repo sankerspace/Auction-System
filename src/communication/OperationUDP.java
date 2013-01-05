@@ -10,7 +10,7 @@ import java.net.DatagramPacket;
  *
  * @author sanker
  */
-public class OperationUDP {
+public class OperationUDP implements Operation{
     
     int standardBufferSize = 256;
     
@@ -32,7 +32,7 @@ public class OperationUDP {
     }
     
     
-    public void writeString(String s)throws OperationUDPException
+    public void writeString(String s)throws OperationException
     {
         byte[] buf=s.getBytes();
         DatagramPacket packet = new DatagramPacket(buf,buf.length,
@@ -40,7 +40,7 @@ public class OperationUDP {
         try {
             client.sendPacket(packet);
         } catch (ClientUDPException e) {
-           throw new  OperationUDPException("ClientUDPException::",e);
+           throw new  OperationException("ClientUDPException::",e);
         }
      
     }
@@ -51,7 +51,7 @@ public class OperationUDP {
      *       will be stored in the client
      */
     //standard buffer can read a maximum of 256 bytes
-    public String readString()throws OperationUDPException
+    public String readString()throws OperationException
     {
         byte[] buf=new byte[standardBufferSize];
         DatagramPacket packet = new DatagramPacket(buf,buf.length);
@@ -61,7 +61,7 @@ public class OperationUDP {
                     , packet.getPort());
             return (new String(buf,0,packet.getLength()));
         } catch (ClientUDPException e) {
-           throw new  OperationUDPException("ClientUDPException::",e);
+           throw new  OperationException("ClientUDPException::",e);
         }
      
     }

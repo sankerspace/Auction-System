@@ -5,7 +5,7 @@
 package auctionmanagement;
 
 import auctionmanagement.AuctionManagementSystem;
-import communication.Operation;
+import communication.OperationTCP;
 import communication.OperationException;
 import communication.Server;
 import communication.Server.Handler;

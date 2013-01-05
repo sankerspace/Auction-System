@@ -7,7 +7,7 @@ package LoadTest;
 import MyLogger.Log;
 import auctionmanagement.Auction;
 import communication.Client;
-import communication.Operation;
+import communication.OperationTCP;
 import communication.OperationException;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,7 +71,7 @@ public  class AuctionTestTimerTasksforLoadTest {
              try{
                  //get Lock
                 this.lockforactiveForeignAuctions.lock();
-                Operation op = new Operation(this.clientTCP);
+                OperationTCP op = new OperationTCP(this.clientTCP);
                 //Timeunit in milliseconds
                 long waitTime = 6000L;//wait 6s for messages and then continue
               
@@ -235,7 +235,7 @@ public  class AuctionTestTimerTasksforLoadTest {
              try{
                  //get Lock
                 this.lockforactiveForeignAuctions.lock();
-                Operation op = new Operation(this.clientTCP);
+                OperationTCP op = new OperationTCP(this.clientTCP);
                 op.writeString("!list");
                  //Timeunit in milliseconds
                 long waitTime = 5000L;//wait 5s for messages and then continue

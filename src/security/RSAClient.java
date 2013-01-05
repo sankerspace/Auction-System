@@ -4,7 +4,12 @@
  */
 package security;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -33,14 +38,18 @@ public class RSAClient extends RSAAuthentication{
     private static org.apache.log4j.Logger logger=org.apache.log4j.Logger.getLogger(RSAClient.class.getSimpleName());
     private PublicKey publicKeyServer=null;
     private PrivateKey privateKeyClient=null;
+    private String userinfo=null;
    
     
-    public RSAClient(String user,String servername,String ClientKeyDirectory
+    public RSAClient(String user,String userinfo,String servername,String ClientKeyDirectory
         ,String ServerKeyDirectory)throws RSAAuthenticationException
     {
         super(ClientKeyDirectory,ServerKeyDirectory);
         this.clientname=user;
-        this.servername=servername;   
+        this.servername=servername;
+        this.userinfo=userinfo;
+        
+        
        
         try {
 
@@ -83,7 +92,7 @@ public class RSAClient extends RSAAuthentication{
     //userinfo contains the tcpPort information, but business logic
     //has no place in the security package
     //the entire message is NOT Base64 encoded, this is outside work
-    public byte[] HandshakeProtocolMessageOneCreate(String user,String userinfo)throws RSAAuthenticationException
+    public byte[] HandshakeProtocolMessageOneCreate()throws RSAAuthenticationException
     {
         /**
          * msg=!login +user +userinfo   +Base64(clientchallenge) 
@@ -91,9 +100,9 @@ public class RSAClient extends RSAAuthentication{
          */
         String[] s1=null,s2=null;
         try {
-            if((user==null)||(userinfo==null))
+            if((clientname==null)||(userinfo==null))
                 throw new RSAAuthenticationException("Invalid Arguments.");
-            else if( (((s1=user.split(" ")).length)>1) || (((s2=userinfo.split(" ")).length)<1))
+            else if( (((s1=clientname.split(" ")).length)>1) || (((s2=userinfo.split(" ")).length)<1))
             {
                 throw new RSAAuthenticationException("Invalid Arguments.");
                 
@@ -101,7 +110,7 @@ public class RSAClient extends RSAAuthentication{
             {
                  throw new RSAAuthenticationException("Invalid Arguments.");
             }
-            String message = "!login"+" "+user+" "+userinfo+" ";
+            String message = "!login"+" "+clientname+" "+userinfo+" ";
             byte[] encrypted=null;
             //for debug purpose
             
@@ -111,8 +120,8 @@ public class RSAClient extends RSAAuthentication{
             message+=(new String(Base64ClientChallenge));
            
             encrypted=c1.doFinal(message.getBytes());
-      
-            return Base64Encoder.encodeBase64(encrypted);
+            byte[] encryptedBASE64=Base64Encoder.encodeBase64(encrypted);
+            return encryptedBASE64;
             
         } catch (IllegalBlockSizeException ex) {
             throw new RSAAuthenticationException("ClientToServerHandshakeProtocol:IllegalBlockSizeException:"+ex.getMessage());
@@ -162,6 +171,7 @@ public class RSAClient extends RSAAuthentication{
             logger.debug("ServerChallenge:"+EasySecure.convertBytetoStringofDigits(serverChallenge));
             logger.debug("SecretKey:"+EasySecure.convertBytetoStringofDigits(Secretkey.getEncoded()));
             logger.debug("IVParameter:"+EasySecure.convertBytetoStringofDigits(IVParameter));
+           
                 
             }else
                 return false;    
@@ -206,6 +216,58 @@ public class RSAClient extends RSAAuthentication{
         return tmp;
         
     } 
+    
+    public void startClientAuthenticationProcedure(InputStream in,OutputStream out) throws RSAAuthenticationException
+    {
+         DataOutputStream w = new DataOutputStream(out);
+         DataInputStream r = new DataInputStream(in);
+         String send=null,read=null,error=this.getErrorMessage();
+         boolean b;
+        try {
+            //first message send
+            byte[] firstmessage=this.HandshakeProtocolMessageOneCreate();
+            send=new String(firstmessage);
+            w.writeUTF(send);
+            
+            
+            //second message receive
+            read=r.readUTF();
+            if(read.contains(error))
+                throw new RSAAuthenticationException("Authentication Denied.");
+            byte[] secondmessage = read.getBytes();
+            b=this.HandshakeProtocolMessageTwoHandle(secondmessage);
+            if( !b )
+                throw new RSAAuthenticationException("Authentication Denied.");
+           
+            //third message send
+            byte[] thirdmessage=this.HandshakeProtocolMessageThreeCreate();
+            send = new String(thirdmessage);
+            w.writeUTF(send);
+            
+        } catch (RSAAuthenticationException ex) {
+            try {
+                w.writeUTF(error);
+            } catch (IOException ex1) {  }
+           throw new RSAAuthenticationException(ex.getMessage());
+        }catch (IOException ex) {
+            try {
+                w.writeUTF(error);
+            } catch (IOException ex1) {
+              
+            }
+           throw new RSAAuthenticationException("IOException:"+ex.getMessage());
+        }catch(Exception ex)
+        {
+            try {
+                w.writeUTF(error);
+            } catch (IOException ex1) {
+               
+            }
+            throw new RSAAuthenticationException("Exception:"+ex.getMessage());
+        }
+         
+    }
+    
     
     
 }

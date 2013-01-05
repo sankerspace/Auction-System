@@ -25,14 +25,14 @@ import static org.junit.Assert.*;
  *
  * @author sanker
  */
-public class RSAServerClientTest {
+public class RSAServerClientSimpleTest {
     
     private String ServerkeyDirectory=null; 
     private String ClientkeyDirectory=null;
     public static InputStream stdin=System.in;
     
    // ByteArrayInputStream stream
-    public RSAServerClientTest() throws IOException {
+    public RSAServerClientSimpleTest() throws IOException {
         ServerkeyDirectory="./keys/Server/";
         ClientkeyDirectory="./keys/Clients/";
     }
@@ -60,7 +60,7 @@ public class RSAServerClientTest {
 
     
     @Test
-    public void testServerClientRSAAuthentication() throws Exception {
+    public void testServerClientRSAAuthenticationSimple() throws Exception {
         System.out.println("testServerClientRSAAuthentication:\n");
         InputStream input1 = new ByteArrayInputStream(("23456\n").getBytes());
         InputStream input2 = new ByteArrayInputStream(("12345\n").getBytes());
@@ -77,13 +77,13 @@ public class RSAServerClientTest {
             
             //Initialize RSA CLIENT
             System.out.println("Create RSA Client instance....");
-            System.setIn(input2);
-            RSAClient client = new RSAClient("alice","auction-server",ClientkeyDirectory,
+            System.setIn(input2);//USER ********ALICE********
+            RSAClient client = new RSAClient("alice","1234567","auction-server",ClientkeyDirectory,
                     ServerkeyDirectory);
             
             //first message RSA Client to RSA Server [HANDSHAKEPROTOCOL]
             System.out.println("[HANDSHAKEPROTOCOL] First Message:");
-            byte[] firstmessage=client.HandshakeProtocolMessageOneCreate(client.getUsername(), "1234567");
+            byte[] firstmessage=client.HandshakeProtocolMessageOneCreate();
             b=server.HandshakeProtocolMessageOneHandle(firstmessage);
             Assert.assertTrue(b);
             

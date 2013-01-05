@@ -4,7 +4,7 @@
  */
 package auctionmanagement;
 
-import communication.Operation;
+import communication.OperationTCP;
 import communication.OperationException;
 import java.lang.Thread;
 import java.io.PrintWriter;
@@ -29,7 +29,7 @@ public class AuctionTCPMessageServer implements Runnable{
     public void run()
     {
         errorlog.output("AuctionTCPMessageServerThread started...", 2);
-        Operation op=null;
+        OperationTCP op=null;
         Answer r=null;
         while(!Thread.currentThread().isInterrupted())
         {
@@ -37,7 +37,7 @@ public class AuctionTCPMessageServer implements Runnable{
                 
                 
                 r=outgoinganswers.take();
-                op = new Operation(r.getClient());
+                op = new OperationTCP(r.getClient());
                 op.writeString(r.getMessage());
                 
                errorlog.output("AuctionTCPMessageServerThread send a message:\n"+r.getMessage(), 3);  
