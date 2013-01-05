@@ -46,7 +46,6 @@ public class AuctionClient {
             //this.handleUDP=new AuctionClientUDPHandler(output);
             this.udpPort = udpPort;
             this.clientTCP = new Client(host, tcpPort);
-
             this.handleTCP = new AuctionClientTCPHandler(this.clientTCP, output);
             //this.serverUDP=new ServerUDP(udpPort,handleUDP,output);
             // this.serverUDP.setErrorLog(output);

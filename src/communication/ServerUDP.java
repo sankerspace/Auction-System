@@ -67,7 +67,7 @@ public class ServerUDP implements Runnable{
              
                this.handler.handle(op.readString());
 
-            }catch(OperationUDPException e)
+            }catch(OperationException e)
             {
                 logger.output("UDPServer error:"+e.getMessage());
                 Thread.currentThread().interrupt();

@@ -8,6 +8,7 @@ import communication.OperationUDP;
 import communication.OperationUDPException;
 import java.util.concurrent.LinkedBlockingQueue;
 import MyLogger.Log;
+import communication.OperationException;
 
 /**
  *
@@ -44,7 +45,7 @@ public class AuctionUDPMessageServer  implements Runnable {
                 errorlog.output("AuctionUDPMessageServerThread send a message:\n"+n.getMessage(), 3);  
             } catch (InterruptedException ex) {
               Thread.currentThread().interrupt();
-            }catch(OperationUDPException e)
+            }catch(OperationException e)
             {
                 errorlog.output("AuctionUDPMessageServerThread:"+e.getMessage());
             }
