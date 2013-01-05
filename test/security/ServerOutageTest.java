@@ -1,8 +1,6 @@
 package security;
 
-import Main.AuctionClient;
-import Main.AuctionServer;
-import Main.BillingServer;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -44,18 +42,6 @@ public class ServerOutageTest {
          * 1. Create 3 new clients and servers
          */
 
-        /*
-         * Init AuctionServer
-         */
-        AuctionServer auctionserver = new AuctionServer();
-
-        /*
-         * Init Clients
-         */
-        AuctionClient auctionClient1 = new AuctionClient();
-        AuctionClient auctionClient2 = new AuctionClient();
-        AuctionClient auctionClient3 = new AuctionClient();
-        
      //   auctionClient1.
         /*
          * 2. Use command !getClientList with one of the clients (interactive)
