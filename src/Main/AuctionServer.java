@@ -1,9 +1,4 @@
-
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+package Main;
 
 /**
  *
@@ -18,9 +13,7 @@ public class AuctionServer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
         //PartBClient client=new PartBClient(args);
-        
         //client.printUsage();
      PartBServer server = new PartBServer(args);
       

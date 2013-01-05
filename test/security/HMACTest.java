@@ -19,7 +19,6 @@ public class HMACTest {
     
     public HMACTest() {
     }
-    
     @BeforeClass
     public static void setUpClass() {
     }

@@ -43,7 +43,6 @@ public class StatisticsEventTest {
      public void testConstructor() {
          System.out.println("\n");
         StatisticsEvent instance = new StatisticsEvent(1.34,StatisticsEvent.StatisticsEventType.AUCTION_SUCCESS_RATIO);
-        // TODO review the generated test code and remove the default call to fail.
         System.out.println("test StatisticsEvent Construktor ");
         System.out.println("Event:getID:"+instance.getID());
         System.out.println("Event:getType:"+instance.getType());
@@ -55,7 +54,6 @@ public class StatisticsEventTest {
     @Test
     public void testCopyConstructor() {
         System.out.println("\n");
-        // TODO review the generated test code and remove the default call to fail.
         System.out.println("test StatisticsEvent CopyConstruktor");
         StatisticsEvent tocopy=new StatisticsEvent(2.34,StatisticsEvent.StatisticsEventType.AUCTION_TIME_AVG);
         StatisticsEvent instance=new StatisticsEvent(tocopy);

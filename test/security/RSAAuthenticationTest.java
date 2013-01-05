@@ -74,7 +74,6 @@ public class RSAAuthenticationTest {
         assertNotNull(result);
         System.out.println("Server PublicKey:");
         System.out.println(result);
-        // TODO review the generated test code and remove the default call to fail.
        // fail("The test case is a prototype.");
     }
 
@@ -99,7 +98,6 @@ public class RSAAuthenticationTest {
         print.println("23456");print.flush();
         PrivateKey result = instance.getPrivateKey(file);
         //assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
         assertNotNull(result);
         System.out.println("Server Private Key:");

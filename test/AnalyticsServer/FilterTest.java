@@ -116,8 +116,6 @@ public class FilterTest {
         assertEquals(test_5, 5);
         assertEquals(test_6, 2);
         assertEquals(test_7, 2);
-        
-        // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
 }

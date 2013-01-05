@@ -9,7 +9,6 @@ import auctionmanagement.Auction;
 import communication.Client;
 import communication.OperationTCP;
 import communication.OperationException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -64,9 +63,8 @@ public  class AuctionTestTimerTasksforLoadTest {
         }
 
         
+        @Override
         public void run() {
-            
-            
             logger.output(this.clientname+":PerMinuteTask started.",2);
              try{
                  //get Lock

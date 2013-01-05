@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package utils;
 
 import java.io.File;
@@ -75,7 +71,6 @@ public class EasyPropertiesTest {
         boolean expResult = true;
         boolean result = EasyProperties.login(file_1, user, pass);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
     
@@ -91,7 +86,6 @@ public class EasyPropertiesTest {
         pass = "Staisic";expResult=false;
         result = EasyProperties.login(file_1, user, pass);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
     
@@ -114,8 +108,6 @@ public class EasyPropertiesTest {
         expResult = true;
         result = EasyProperties.login(file_1, user_3, pass_3);
         assertEquals(expResult, result);
-       
-        // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
     
@@ -130,10 +122,6 @@ public class EasyPropertiesTest {
         boolean expResult = true;
         boolean result = EasyProperties.writeProperty(file_2, user_1, pass_1,"");
         assertEquals(expResult, result);
-        
-        
-       
-        // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
     
@@ -148,10 +136,6 @@ public class EasyPropertiesTest {
         boolean expResult = true;
         pass = EasyProperties.getProperty(file_2, user);
         assertEquals(true,pass.contentEquals("Mama"));
-        
-        
-       
-        // TODO review the generated test code and remove the default call to fail.
         //fail("The test case is a prototype.");
     }
 }
