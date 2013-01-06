@@ -25,6 +25,9 @@ public class PartBClient {
     private  String host=null;
     private  int tcpPort=0;
     private  int udpPort=0;
+    private  String ServerPublicKeyFilename=null;
+    private  String ClientKeyDirectoryname=null;
+    private  String ServerKeyDirectoryname=null;
     private  AuctionClient auction=null;
     private  Log output=null;
     
@@ -37,20 +40,30 @@ public class PartBClient {
     
    public boolean checkandgetArguments()
     {
-//        if(arguments.length != 3)
-//               return false;
+        if(arguments.length != 3)
+               return false;
             host = this.arguments[0];
-   //     try{
+       try{
             tcpPort=Integer.parseInt(this.arguments[1]);
             udpPort=Integer.parseInt(this.arguments[2]);
+            ServerPublicKeyFilename=this.arguments[3];
+            ClientKeyDirectoryname=this.arguments[4];
+            ServerKeyDirectoryname=this.arguments[5];
+            
+            if(ServerPublicKeyFilename.contains(".pub.pem"))
+                ServerPublicKeyFilename=ServerPublicKeyFilename.replace(".pub.pem","");
+            if(!ClientKeyDirectoryname.endsWith("/"))
+                ClientKeyDirectoryname.concat("/");
+            if(!ServerKeyDirectoryname.endsWith("/"))
+                ServerKeyDirectoryname.concat("/");
             
             return true;
-//        }catch(NumberFormatException e)
-//        {
-//            return false;
-//        }
-//        
-//       return true;
+        }catch(NumberFormatException e)
+        {
+            return false;
+        }
+        
+      
     }
     
     
@@ -61,6 +74,8 @@ public class PartBClient {
                 + "\n\t"+"-host:       host name or IP of the auction server"
                 + "\n\t"+"-tcpPort:    TCP Connection port on which the auction server is listening for incoming connections"
                 + "\n\t"+"-udpPort:    port is for handling UDP notofocations from the auctions server"
+                + "\n\t"+"-Server.pub: Server public key file name   "
+                + "\n\t"+"-ClientKeyDirectry: Directory of all Client keys   "
                  );
     }
     
@@ -77,7 +92,10 @@ public class PartBClient {
         
         try {
             output.output("Creating AuctionClient Object...",2);
-            auction = new AuctionClient(this.host,this.tcpPort,this.udpPort,output);
+            auction = new AuctionClient(this.host,this.tcpPort,this.udpPort,
+                    this.ServerPublicKeyFilename,
+                    this.ClientKeyDirectoryname,
+                    this.ServerKeyDirectoryname,this.output);
             
             auction.run();
            

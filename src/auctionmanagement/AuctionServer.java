@@ -17,9 +17,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import MyLogger.Log;
 import communication.Client;
 import communication.ClientException;
+import communication.OperationSecure;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
+import security.RSAAuthenticationException;
 
 
 
@@ -31,25 +33,39 @@ public class AuctionServer implements Runnable{
     private AuctionManagementSystem ams=null;
     private Server server=null;
     private final ExecutorService pool;
-    private LinkedBlockingQueue<CommandTask> queue=null;
+    private LinkedBlockingQueue<CommandTask> queue=null;//communication to AMS
     private Log output=null;
     //Alle Server.Handler schreiben auf die queue, nur das ActionmanagementSystem darf
     //von der queue lesen [blockierend]
-    public AuctionServer(int tcpPort,String analytic, String billing,Log output)throws AuctionServerException
+    
+    
+    public AuctionServer(int tcpPort,String analytic, String billing,
+            String ServerPrivateKeyFilename,String ClientKeyDirectoryname,
+            String ServerKeyDirectoryname,Log output)throws AuctionServerException
     {
-       this.output=output;
-       //communication between ServerSocketHandleThread and AMSHandlerThread
-       queue = new LinkedBlockingQueue<CommandTask>();
-       pool = Executors.newCachedThreadPool();
-       ams= new AuctionManagementSystem(analytic, billing, queue,pool,output);
-       output.output("AuctionServer Port:"+tcpPort+"", 3);
-       Server.Handler serversocketHandle=new ServerSocketHandleThread(queue,pool,output);
-       pool.execute(ams);
         try {
-            server=new Server(tcpPort,serversocketHandle,pool,output);
-            pool.execute(server);
+           this.output=output;
+           OperationSecure op=new OperationSecure(
+                   ServerPrivateKeyFilename,
+                   ClientKeyDirectoryname,
+                   ServerKeyDirectoryname);
+           //communication between ServerSocketHandleThread and AMSHandlerThread
+           queue = new LinkedBlockingQueue<CommandTask>();
+           pool = Executors.newCachedThreadPool();
+           ams= new AuctionManagementSystem(analytic, billing, queue,pool,output);
+           output.output("AuctionServer Port:"+tcpPort+"", 3);
+           Server.Handler serversocketHandle=new ServerSocketHandleThread(queue,
+                   pool,op,output);
+           pool.execute(ams);
+        
+           server=new Server(tcpPort,serversocketHandle,pool,output);
+           pool.execute(server);
         } catch (ServerException e) {
             throw (new AuctionServerException("ServerException:"+e.getMessage()));
+        }catch (OperationException e) {
+            throw (new AuctionServerException("OperationException:"+e.getMessage()));
+        }catch (RSAAuthenticationException e) {
+            throw (new AuctionServerException("RSAAuthenticationException:"+e.getMessage()));
         }
         
         
@@ -60,20 +76,41 @@ public class AuctionServer implements Runnable{
     {
         output.output("AuctionServerThread started..,", 2);
         String line=null;
+        
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         while(!Thread.currentThread().isInterrupted())
         {
             try {
+                output.output("\n:");
                 while((line=in.readLine())!=null)
                 {
-                    
+                    //this.queue.offer(Commandtask); nur für !closeconnection
                     Thread.currentThread().interrupt();
+                    //server.shutdown();
+                    //nach paar sekunden
+                    /*
+                    Server.Handler serversocketHandle=new ServerSocketHandleThread(queue,
+                        pool,ServerPrivateKeyFilename,
+                        ClientKeyDirectoryname,ServerKeyDirectoryname,output);
+      
+                    try {
+                        server=new Server(tcpPort,serversocketHandle,pool,output);
+                        pool.execute(server);
+                    } catch (ServerException e) {
+                        throw (new AuctionServerException("ServerException:"+e.getMessage()));
+                    }* */
+                                
                     break;
+                  
+                }//while
+                } catch (IOException e) {
+                            
+                    this.output.output("AuctionServerThread:IOException:"+e.getMessage()); 
+                        
                 }
-            } catch (IOException e) {
-                this.output.output("AuctionServerThread:IOException:"+e.getMessage());
-            }
-        }  
+           
+        } //while(!Thread.
+                
         output.output("AuctionServerThread finished..,", 2);
   
     }
@@ -119,19 +156,27 @@ public class AuctionServer implements Runnable{
         private final ExecutorService pool;
         private LinkedBlockingQueue<CommandTask> queue=null;
         private Log output=null;
+        private OperationSecure op=null;
         
-       public ServerSocketHandleThread(LinkedBlockingQueue<CommandTask> queue,ExecutorService pool,Log output)
+       public ServerSocketHandleThread(LinkedBlockingQueue<CommandTask> queue,
+               ExecutorService pool,
+               OperationSecure op,
+               Log output)
        {
            this.pool=pool;
            this.queue=queue;
            this.output=output;
+           this.op=op;
        }
        
        
        public void run()
        {
-           AuctionTCPReadHandler handler = new AuctionTCPReadHandler(this.queue,
-                   this.getClient(),this.output);
+           AuctionTCPReadHandler handler = new AuctionTCPReadHandler(
+                    this.queue,
+                    this.getClient(),
+                    op,
+                    this.output);
            this.pool.execute(handler);
        
        }

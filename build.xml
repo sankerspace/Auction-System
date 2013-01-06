@@ -16,9 +16,10 @@
     <property name="billing.bindingName" value="BillingsServerInterface"/><!-- RMI Binding Name of the Billing Server -->
     <property name="server.port" value="14450"/><!-- TCP port -->
     <!-- new properties for assignment 3 -->
-    <property name="server.key" value="keys/Server/auction-server.pem"/><!-- Private key file of Auction Server -->
-    <property name="server.key.pub" value="keys/Server/auction-server.pub.pem"/><!-- Public key file of Auction Server -->
+    <property name="server.key" value="auction-server.pem"/><!-- Private key file of Auction Server -->
+    <property name="server.key.pub" value="auction-server.pub.pem"/><!-- Public key file of Auction Server -->
     <property name="clients.key.dir" value="keys/Clients/"/><!-- Directory of private/public keys of bidding clients -->
+	<property name="server.key.dir" value="keys/Server/"/><!-- Directory of private/public keys of bidding clients -->
     <property name="client1.port" value="17801"/><!-- UDP port (and TCP port for assignment 3!) of 1st Bidding Client 10000 + dslabXXX * 10 + 1 -->
     <property name="client2.port" value="17802"/><!-- UDP port (and TCP port for assignment 3!) of 2nd Bidding Client 10000 + dslabXXX * 10 + 2 -->
     <property name="client3.port" value="17803"/><!-- UDP port (and TCP port for assignment 3!) of 3rd Bidding Client 10000 + dslabXXX * 10 + 3-->
@@ -53,6 +54,7 @@
             <arg value="${billing.bindingName}"/>
             <arg value="${server.key}"/>
             <arg value="${clients.key.dir}"/>
+			<arg value="${server.key.dir}"/>
         </java>
     </target>
 
@@ -78,6 +80,7 @@
             <arg value="${client1.port}"/>
             <arg value="${server.key.pub}"/>
             <arg value="${clients.key.dir}"/>
+			<arg value="${server.key.dir}"/>
         </java>
     </target>
 
@@ -89,6 +92,7 @@
             <arg value="${client2.port}"/>
             <arg value="${server.key.pub}"/>
             <arg value="${clients.key.dir}"/>
+			<arg value="${server.key.dir}"/>
         </java>
     </target>
 
@@ -100,6 +104,7 @@
             <arg value="${client3.port}"/>
             <arg value="${server.key.pub}"/>
             <arg value="${clients.key.dir}"/>
+			<arg value="${server.key.dir}"/>
         </java>
     </target>
 

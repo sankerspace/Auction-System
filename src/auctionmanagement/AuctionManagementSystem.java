@@ -337,7 +337,7 @@ public class AuctionManagementSystem implements Runnable {
                     logger.output("AMSHandlerThread:list:Exception:" + e.getMessage());
                 }
             } else if (this.commandtask.clientList != null) {
-                logger.output("AMSHandlerThread:clientList");
+                logger.output("AMSHandlerThread:clientList",2);
                 try {
                     //TODO Stage4:test this block
                     StringBuffer clientList = new StringBuffer();
@@ -813,7 +813,14 @@ public class AuctionManagementSystem implements Runnable {
                     logger.output("AMS_HandlerThread:end:Exception"
                             + ":" + e.getMessage(), 2);
                 }
+            }else if (this.commandtask.dummy != null) {
+                
+                Answer a = new Answer("!dummy", this.commandtask.dummy.client);
+                outgoingmessagechannel.offer(a);
+                                
             }
+            
+            
             logger.output("AMS_HandlerThread finished", 2);
         }
 

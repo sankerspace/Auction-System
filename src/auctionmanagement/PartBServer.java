@@ -26,7 +26,9 @@ public class PartBServer {
      AuctionServer auction=null;
      String billing = null;
      String analytic = null;
-     
+     String ServerPrivateKeyFilename=null;
+     String ClientKeyDirectoryname=null;
+     String ServerKeyDirectoryname=null;
      
     public PartBServer(String[] args)
     {
@@ -41,8 +43,11 @@ public class PartBServer {
         tcpPort=Integer.valueOf(arguments[0]);
         analytic = arguments[1];
         billing=arguments[2];
-        
-        
+        ServerPrivateKeyFilename=arguments[3];
+        ClientKeyDirectoryname=arguments[4];
+        ServerKeyDirectoryname=arguments[5];
+        if(ServerPrivateKeyFilename.contains(".pem"))
+            ServerPrivateKeyFilename=ServerPrivateKeyFilename.replace(".pem", "");
        
        return true;
     }
@@ -71,7 +76,12 @@ public class PartBServer {
        
        
         try {
-            auction = new AuctionServer(this.tcpPort,analytic,billing,output);
+            
+            auction = new AuctionServer(this.tcpPort,analytic,billing,
+                    this.ServerPrivateKeyFilename,
+                    this.ClientKeyDirectoryname,
+                    this.ServerKeyDirectoryname,
+                    output);
             auction.run();
         } catch (AuctionServerException e) {
             output.output("PartBServer:"+e.getMessage());

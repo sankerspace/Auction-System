@@ -53,6 +53,19 @@ public class OtherTests {
     public void tearDown() {
     }
 
+    @Test
+    public void testStringExtraction() throws Exception {
+        System.out.println("testStringExtraction");
+        String a="servername.pub";
+        String b=null;
+        System.out.println("extract '.pub' from a filename String:");
+        b=a.replace(".pub","");
+        
+        assertArrayEquals(b.toCharArray(), "servername".toCharArray());
+        System.out.println("extracted string: "+b);
+        
+       
+    }
     /**
      * Test of getPublicKey method, of class RSAAuthentication.
      */

@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import security.RSAAuthenticationException;
 
 /**
  *
@@ -32,15 +33,26 @@ public class AuctionClient {
     private final ExecutorService pool;
     private ServerUDP serverUDP = null;
     private int udpPort;
+    private  String ServerPublicKeyFilename=null;
+    private  String ClientKeyDirectoryname=null;
+    private  String ServerKeyDirectoryname=null;
     private AuctionClientUDPHandler handleUDP = null;
     private AuctionClientTCPHandler handleTCP = null;
     private Client clientTCP = null;
     private Log errorlog = null;
     private ClientStatus userstatus = null;
+    private Operation operation=null;
 
-    public AuctionClient(String host, int tcpPort, int udpPort, Log output) throws AuctionClientException {
+    public AuctionClient(String host, int tcpPort, int udpPort,
+            String ServerPublicKeyFilename,
+            String ClientKeyDirectoryname,
+            String ServerKeyDirectoryname,
+            Log output) throws AuctionClientException {
         this.errorlog = output;
         userstatus = new ClientStatus("none");
+        this.ServerPublicKeyFilename=ServerPublicKeyFilename;
+        this.ClientKeyDirectoryname=ClientKeyDirectoryname;
+        this.ServerKeyDirectoryname=ServerKeyDirectoryname;
         try {
 
             //this.handleUDP=new AuctionClientUDPHandler(output);
@@ -64,13 +76,19 @@ public class AuctionClient {
          } */
     }
 
-    public AuctionClient(String host, int tcpPort, int udpPort, ExecutorService pool, Log output) throws AuctionClientException {
+    public AuctionClient(String host, int tcpPort, int udpPort,
+            String ServerPublicKeyFilename,
+            String ClientKeyDirectoryname,
+            String ServerKeyDirectoryname, ExecutorService pool, Log output) throws AuctionClientException {
         this.errorlog = output;
         userstatus = new ClientStatus("none");
         try {
 
             //this.handleUDP=new AuctionClientUDPHandler(output);
             this.udpPort = udpPort;
+            this.ServerPublicKeyFilename=ServerPublicKeyFilename;
+            this.ClientKeyDirectoryname=ClientKeyDirectoryname;
+            this.ServerKeyDirectoryname=ServerKeyDirectoryname;
             this.clientTCP = new Client(host, tcpPort);
             this.handleTCP = new AuctionClientTCPHandler(this.clientTCP, output);
             //this.serverUDP=new ServerUDP(udpPort,handleUDP,output);
@@ -94,13 +112,13 @@ public class AuctionClient {
         this.errorlog.output("AuctionClient is running..", 2);
         Request req = null;
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-
+        
         String line;
         String msg;
         this.errorlog.out(">");
         try {
-
-            OperationTCP op = new OperationTCP(this.clientTCP);
+            //without login only regular channel to the server is established
+            operation = new OperationTCP(this.clientTCP);
            
             while((line=in.readLine())!=null)
             {
@@ -116,8 +134,19 @@ public class AuctionClient {
                         if (req.getCommandName().contains("!end")) {
                             break;
                         } else if (req.getCommandName().contains("!login")) {
+                            operation.writeString("!dummy");
+                           
+                            String user=req.getUserName();
+                            operation = new OperationSecure(clientTCP,
+                                    user,
+                                    (new Integer(this.udpPort)).toString(),
+                                    ServerPublicKeyFilename,
+                                    this.ServerKeyDirectoryname,
+                                    (this.ClientKeyDirectoryname+user));
+                            this.handleTCP.setSecureChannel(operation);
                             this.userstatus.setUser(req.getUserName());
-                            req.setUdpPort(this.udpPort);
+                            req=null;
+                            //req.setUdpPort(this.udpPort);
                         } else if (!req.getCommandName().contains("!list")) {
                             throw (new RequestException("You must be logged in!\n>"));
                         } else if (!req.getCommandName().contains("!getClientList")) {  //TODO Stage4:test this line
@@ -134,21 +163,29 @@ public class AuctionClient {
                                     + this.userstatus.getUser() + ">"));
                         } else if (req.getCommandName().contains("!logout")) {
                             this.userstatus.resetUser();
+                            this.handleTCP.setRegularChannel();
                         } else if (req.getCommandName().contains("!login")) {
                             throw (new RequestException("You must log out!" + "\n"
                                     + this.userstatus.getUser() + ">"));
                         }
                     }
-                    msg = req.createRequestStringforServer();
-                    this.errorlog.output("createRequestStringforServer():" + msg, 3);
-                    if (msg != null) {
-                        op.writeString(msg);
-                    } else {
-                        throw (new RequestException("Cannot generate message!"));
-                    }
+                   //if a request object is avaible, send the created String to the server
+                   if(req!=null){
+                        msg = req.createRequestStringforServer();
+                        this.errorlog.output("createRequestStringforServer():" + msg, 3);
+                        if (msg != null) {
+                            operation.writeString(msg);
+                        } else {
+                            throw (new RequestException("Cannot generate message!"));
+                        }
+                   }
 
                 } catch (RequestException e) {
 
+                    this.errorlog.output(e.getMessage(), 2);
+
+                }catch (RSAAuthenticationException e) {
+                    this.errorlog.output("Error:Authentication failed");
                     this.errorlog.output(e.getMessage(), 2);
 
                 }
@@ -291,13 +328,13 @@ public class AuctionClient {
         {
            this.switchToSecureChannel=true; 
            this.opSecure=new OperationSecure((OperationSecure)op);
-           this.op=null;
+           //this.op=null;
         }
         
         public void setRegularChannel() throws OperationException
         {
             this.switchToSecureChannel=false;
-            this.opSecure=null;
+            //this.opSecure=null;
             this.op = new OperationTCP(this.client);
         }
 

@@ -7,6 +7,8 @@ package auctionmanagement;
 import MyLogger.Log;
 import communication.Client;
 import communication.ClientException;
+import communication.ClientSecure;
+import communication.Operation;
 import communication.OperationTCP;
 import communication.OperationException;
 import communication.OperationSecure;
@@ -14,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import security.RSAAuthenticationException;
 
 /**
  *
@@ -22,16 +25,20 @@ import java.util.logging.Logger;
 public class AuctionTCPReadHandler implements Runnable{
     
     private LinkedBlockingQueue<CommandTask> queue=null;
-    private Client client=null;
+    private ClientSecure client=null;
     private Log logger=null;
     private boolean secureconnectionestablished;
-    
-    public AuctionTCPReadHandler(LinkedBlockingQueue<CommandTask> queue,Client client,Log logger)
+    private OperationSecure opsec=null;
+    public AuctionTCPReadHandler(LinkedBlockingQueue<CommandTask> queue,
+            Client client,
+            OperationSecure op,
+            Log logger)
     {
-        this.client=client;
+        this.client=new ClientSecure(client);
         this.queue=queue;
         this.logger=logger;
         secureconnectionestablished=false;
+        
         logger.output("AuctionTCPReadHandler created....", 2);
     }
     
@@ -77,6 +84,11 @@ public class AuctionTCPReadHandler implements Runnable{
                        r.getUserName(),r.getParameter().bidId,r.getParameter().bidValue);
                c= new CommandTask(l);
             
+            }else if(command.contains("dummy"))
+            {
+               CommandTask.Dummy l = new CommandTask.Dummy(r.getClient());
+               c= new CommandTask(l);
+            
             }
             /*
             else if(command.contains("end"))
@@ -94,7 +106,7 @@ public class AuctionTCPReadHandler implements Runnable{
             logger.output("ServerSocketHandleThread started....", 2);
             String message=null;
             //OperationTCP op=null;
-            OperationSecure opSec=null;
+            OperationSecure op=null;
             CommandTask com=null;
             try {
                 //op=new OperationTCP(this.client);
@@ -103,11 +115,18 @@ public class AuctionTCPReadHandler implements Runnable{
                 {   
                   if(this.secureconnectionestablished)
                   {
-                      //message=op.readString();
+                      message=op.readString();
                       if(message!=null)
                       {
                           if(message.contains("end"))break;
-                          com = this.ExtractInfo(new Request(this.client,message));               
+                          if(message.contains("logout")){
+                              secureconnectionestablished=false;
+                              op=null;
+                              client.setUnsecuredChannel();
+                          }
+                              
+                          com = this.ExtractInfo(new Request(this.client,message)); 
+                          
                           this.queue.offer(com); 
                            logger.output("ServerSocketHandleThread received"
                                    +" message and forwarded a CommandTask Object to AMSThread:\n"
@@ -117,7 +136,40 @@ public class AuctionTCPReadHandler implements Runnable{
                           logger.output("ServerSocketHandleThread received a null message.");
                   }else
                   {
-                    //opSec= new OperationSecure();
+                      try{
+                        op= new OperationSecure(this.opsec);
+                        op.acceptConnection(client);
+                        secureconnectionestablished=true;
+                        Request login=new Request(this.client,"!login "+" "+
+                                op.getUserName()+" "+
+                                op.getUserInfo());
+                        com = this.ExtractInfo(login); 
+                        this.queue.offer(com);
+                        logger.output("ServerSocketHandleThread:Secured Channel"+
+                                " established to "+op.getUserName()+".",2);
+                      }catch(RequestException e)
+                      {//NOCH ÄNDERN  wegen !list
+                          logger.output("ServerSocketHandleThread:secure="+
+                                  secureconnectionestablished+":RequestException"
+                                  +e.getMessage(),2);
+                      }catch(RSAAuthenticationException e)
+                      {//NOCH ÄNDERN  wegen !list
+                          logger.output("ServerSocketHandleThread:secure="+
+                                  secureconnectionestablished+":RSAAuthenticationException"
+                                  +e.getMessage(),2);
+                        //last message was not a authentication message, maybe !list 
+                        Request r=new Request(this.client,op.getLastMessageAfterRSAServerFailure());
+                        com = this.ExtractInfo(r); 
+                        this.queue.offer(com);
+                       
+                          
+                          
+                      }catch(Exception e)
+                      {//NOCH ÄNDERN  wegen !list
+                          logger.output("ServerSocketHandleThread:secure="+
+                                  secureconnectionestablished+":Exception"
+                                  +e.getMessage(),2);
+                      }
                   }
         
        

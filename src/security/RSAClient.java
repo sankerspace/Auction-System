@@ -78,7 +78,7 @@ public class RSAClient extends RSAAuthentication{
              
 
         } catch (InvalidKeyException ex) {
-            throw new RSAAuthenticationException("RSAClient:NoSuchAlgorithmException:"+
+            throw new RSAAuthenticationException("RSAClient:InvalidKeyException:"+
                ex.getMessage());
         }catch (Exception ex) {
             throw new RSAAuthenticationException("RSAClient:Exception:"+
