@@ -337,7 +337,7 @@ public class AuctionManagementSystem implements Runnable {
                     logger.output("AMSHandlerThread:list:Exception:" + e.getMessage());
                 }
             } else if (this.commandtask.clientList != null) {
-                logger.output("AMSHandlerThread:clientList",2);
+                logger.output("AMSHandlerThread:clientList", 2);
                 try {
                     //TODO Stage4:test this block
                     StringBuffer clientList = new StringBuffer();
@@ -345,12 +345,15 @@ public class AuctionManagementSystem implements Runnable {
                     if (iterator.hasNext()) {
                         while (iterator.hasNext()) {
                             Map.Entry<String, Account> entry = iterator.next();
-                            clientList.append(entry.getKey().toString() + "." + " '"
+                            clientList.append("clientList;"+entry.getKey().toString() + "." + " '"
                                     + entry.getValue().getName() + "' "
                                     + entry.getValue().getClient().getDestinationHost() + "\n");
                         }
-                        clientList.setCharAt(clientList.length() - 1, ' ');
+                     //   clientList.setCharAt(clientList.length() - 1, ' ');
                     }
+                    //TODO add client list(account_map) to client class
+                    //Client.setAviableClientsList(account_map), ask marco how to do that exactly
+
                     Answer a = new Answer(clientList.toString(), this.commandtask.clientList.client);
                     outgoingmessagechannel.offer(a);
                 } catch (Exception e) {
@@ -390,11 +393,11 @@ public class AuctionManagementSystem implements Runnable {
                                         if (iterator.hasNext()) {
                                             while (iterator.hasNext()) {
                                                 Map.Entry<String, Account> entry = iterator.next();
-                                                clientList.append(entry.getKey().toString() + "." + " '"
+                                                clientList.append("clientList;"+entry.getKey().toString() + "." + " '"
                                                         + entry.getValue().getName() + "' "
                                                         + entry.getValue().getClient().getDestinationHost() + "\n");
                                             }
-                                            clientList.setCharAt(clientList.length() - 1, ' ');
+                                        //    clientList.setCharAt(clientList.length() - 1, ' ');
                                         }
 
                                         //TODO add client list(account_map) to client class
@@ -451,11 +454,11 @@ public class AuctionManagementSystem implements Runnable {
                                     if (iterator.hasNext()) {
                                         while (iterator.hasNext()) {
                                             Map.Entry<String, Account> entry = iterator.next();
-                                            clientList.append(entry.getKey().toString() + "." + " '"
+                                            clientList.append("clientList;"+entry.getKey().toString() + "." + " '"
                                                     + entry.getValue().getName() + "' "
                                                     + entry.getValue().getClient().getDestinationHost() + "\n");
                                         }
-                                        clientList.setCharAt(clientList.length() - 1, ' ');
+                                      //  clientList.setCharAt(clientList.length() - 1, ' ');
                                     }
 
                                     //TODO add client list(account_map) to client class
@@ -577,21 +580,24 @@ public class AuctionManagementSystem implements Runnable {
                             /*
                              * BEGIN Stage4:startProcess()
                              */
-                            
-                            //TODO Stage4:ask marco, right place to start server outage? needs to be tested
-                            startOutageProcess();
+
+                            /*TODO Stage4:ask marco, right place to start server outage? --> NO! 1. Implement "!closeConnections" First active connections
+                            *need to be closed, then closer ServerSocket (ServerSocketHandleThread) so no new AuctionTCPReadHandlers can be started
+                            * 2. Implement "!reactivateConnection" in AuctionClient which starts the ServerSocket again
+                            */
+                            startOutageProcess(); //ask marco if thats ok here at this point
                             /*
                              * END Stage4:startProcess()
                              */
                         } catch (NullPointerException e) {
                             logger.output("AMS_HandlerThread:create:RMI:NullPointerException"
                                     + ":" + e.getMessage(), 2);
-                                                        /*
+                            /*
                              * BEGIN Stage4:startProcess()
                              */
-                            
+
                             //TODO Stage4:ask marco, right place to start server outage? needs to be tested
-                            
+
                             /*
                              * END Stage4:startProcess()
                              */
@@ -813,14 +819,14 @@ public class AuctionManagementSystem implements Runnable {
                     logger.output("AMS_HandlerThread:end:Exception"
                             + ":" + e.getMessage(), 2);
                 }
-            }else if (this.commandtask.dummy != null) {
-                
+            } else if (this.commandtask.dummy != null) {
+
                 Answer a = new Answer("!dummy", this.commandtask.dummy.client);
                 outgoingmessagechannel.offer(a);
-                                
+
             }
-            
-            
+
+
             logger.output("AMS_HandlerThread finished", 2);
         }
 
@@ -832,7 +838,6 @@ public class AuctionManagementSystem implements Runnable {
             /*
              * 1. Select two random clients from client list
              */
-            
             /*
              * 2. Create two timestamps and use !getTimeStamp
              */

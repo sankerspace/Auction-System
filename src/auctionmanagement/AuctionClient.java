@@ -17,9 +17,12 @@ import auctionmanagement.CheckRequest.checkAuctionAnswer;
 import communication.Operation;
 import communication.OperationException;
 import communication.OperationSecure;
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import security.RSAAuthenticationException;
@@ -42,6 +45,8 @@ public class AuctionClient {
     private Log errorlog = null;
     private ClientStatus userstatus = null;
     private Operation operation=null;
+    private String clientList = null; //Stage4:List of clients, filled by !getClientList command
+    private ReentrantLock lock; //for synced communication between AuctionClient and AuctionTCPHandler
 
     public AuctionClient(String host, int tcpPort, int udpPort,
             String ServerPublicKeyFilename,
@@ -75,7 +80,7 @@ public class AuctionClient {
          throw (new AuctionClientException(":ServerUDPException:",e));
          } */
     }
-
+    
     public AuctionClient(String host, int tcpPort, int udpPort,
             String ServerPublicKeyFilename,
             String ClientKeyDirectoryname,
@@ -90,6 +95,7 @@ public class AuctionClient {
             this.ClientKeyDirectoryname=ClientKeyDirectoryname;
             this.ServerKeyDirectoryname=ServerKeyDirectoryname;
             this.clientTCP = new Client(host, tcpPort);
+            //Übergabe von Lock
             this.handleTCP = new AuctionClientTCPHandler(this.clientTCP, output);
             //this.serverUDP=new ServerUDP(udpPort,handleUDP,output);
             // this.serverUDP.setErrorLog(output);
@@ -112,7 +118,6 @@ public class AuctionClient {
         this.errorlog.output("AuctionClient is running..", 2);
         Request req = null;
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        
         String line;
         String msg;
         this.errorlog.out(">");
@@ -280,8 +285,6 @@ public class AuctionClient {
                 setRegularChannel();
         }
         
-        
-
         public void run()
         {
             String msg=null;
@@ -304,10 +307,11 @@ public class AuctionClient {
                                    out.output("Wait after dummy messages finished.", 3);
                                 }
                             }
-                        }else
+                        } else if(msg.contains("clientList")) {
+                            clientList = msg;
+                        } else
                             out.output(msg);
-                        
-                    }else{
+                    } else {
                         msg = opSecure.readString();
                         out.output(msg);
                     }
