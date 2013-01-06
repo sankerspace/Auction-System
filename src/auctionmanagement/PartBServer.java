@@ -38,7 +38,7 @@ public class PartBServer {
     
    public boolean checkandgetArguments()
     {
-        if(arguments.length != 3)
+        if(arguments.length != 6)
                   return false;
         tcpPort=Integer.valueOf(arguments[0]);
         analytic = arguments[1];

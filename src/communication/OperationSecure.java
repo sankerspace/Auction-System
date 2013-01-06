@@ -116,7 +116,7 @@ public class OperationSecure implements Operation{
             
            
            this.rsaserver = new RSAServer(servername,clientkeydirectory,
-                    serverkeydirectory);
+                   serverkeydirectory);
            this.user=null;
            this.userinfo=null;
            this.securechannel=null;
@@ -147,6 +147,8 @@ public class OperationSecure implements Operation{
          this.securechannel=this.securechannel;
          this.user=op.user;
          this.userinfo=op.userinfo;
+         this.rsaclient=op.rsaclient;
+         this.rsaserver=op.rsaserver;
 
      }
      
@@ -168,6 +170,9 @@ public class OperationSecure implements Operation{
              this.securechannel=this.client.getAES();
              this.user=this.client.getUser();
              this.userinfo=this.client.getUserinfo();
+             this.rsaclient=null;
+             this.rsaserver=null;
+            
          }catch(NullPointerException ex)
          {
              throw new ClientException("Wrong client type:"+ex.getMessage());

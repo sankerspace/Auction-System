@@ -142,7 +142,7 @@ public class AuctionClient {
                                     (new Integer(this.udpPort)).toString(),
                                     ServerPublicKeyFilename,
                                     this.ServerKeyDirectoryname,
-                                    (this.ClientKeyDirectoryname+user));
+                                    this.ClientKeyDirectoryname);
                             this.handleTCP.setSecureChannel(operation);
                             this.userstatus.setUser(req.getUserName());
                             req=null;
@@ -294,7 +294,7 @@ public class AuctionClient {
                     {
                         
                         msg = op.readString();
-                        if(msg.contains("!dummy"))
+                        if(msg.contains("!denied"))
                         {
                             while((opSecure==null))
                             { 

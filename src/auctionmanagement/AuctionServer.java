@@ -47,8 +47,8 @@ public class AuctionServer implements Runnable{
            this.output=output;
            OperationSecure op=new OperationSecure(
                    ServerPrivateKeyFilename,
-                   ClientKeyDirectoryname,
-                   ServerKeyDirectoryname);
+                   ServerKeyDirectoryname,
+                   ClientKeyDirectoryname);
            //communication between ServerSocketHandleThread and AMSHandlerThread
            queue = new LinkedBlockingQueue<CommandTask>();
            pool = Executors.newCachedThreadPool();
@@ -76,13 +76,12 @@ public class AuctionServer implements Runnable{
     {
         output.output("AuctionServerThread started..,", 2);
         String line=null;
-        
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         while(!Thread.currentThread().isInterrupted())
         {
             try {
-                output.output("\n:");
-                while((line=in.readLine())!=null)
+                output.out("\n:");
+                while((line=input.readLine())!=null)
                 {
                     //this.queue.offer(Commandtask); nur für !closeconnection
                     Thread.currentThread().interrupt();

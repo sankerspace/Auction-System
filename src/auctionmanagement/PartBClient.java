@@ -40,7 +40,7 @@ public class PartBClient {
     
    public boolean checkandgetArguments()
     {
-        if(arguments.length != 3)
+        if(arguments.length != 6)
                return false;
             host = this.arguments[0];
        try{

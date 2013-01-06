@@ -37,6 +37,7 @@ public class AuctionTCPReadHandler implements Runnable{
         this.client=new ClientSecure(client);
         this.queue=queue;
         this.logger=logger;
+        this.opsec=op;
         secureconnectionestablished=false;
         
         logger.output("AuctionTCPReadHandler created....", 2);
@@ -84,12 +85,13 @@ public class AuctionTCPReadHandler implements Runnable{
                        r.getUserName(),r.getParameter().bidId,r.getParameter().bidValue);
                c= new CommandTask(l);
             
-            }else if(command.contains("dummy"))
+            }/*
+            else if(command.contains("dummy"))
             {
                CommandTask.Dummy l = new CommandTask.Dummy(r.getClient());
                c= new CommandTask(l);
             
-            }
+            }**/
             /*
             else if(command.contains("end"))
             {
@@ -158,9 +160,14 @@ public class AuctionTCPReadHandler implements Runnable{
                                   secureconnectionestablished+":RSAAuthenticationException"
                                   +e.getMessage(),2);
                         //last message was not a authentication message, maybe !list 
-                        Request r=new Request(this.client,op.getLastMessageAfterRSAServerFailure());
-                        com = this.ExtractInfo(r); 
-                        this.queue.offer(com);
+                          try{
+                            Request r=new Request(this.client,op.getLastMessageAfterRSAServerFailure());
+                            com = this.ExtractInfo(r); 
+                            this.queue.offer(com);
+                          }catch(RequestException ex)
+                          {
+                          
+                          }
                        
                           
                           
@@ -177,7 +184,7 @@ public class AuctionTCPReadHandler implements Runnable{
 
                 }
  
-           } /*catch (OperationException ex) {
+           } catch (OperationException ex) {
                 
                     CommandTask.End l = new CommandTask.End(this.client);
                     CommandTask c= new CommandTask(l);
@@ -185,7 +192,7 @@ public class AuctionTCPReadHandler implements Runnable{
                     
                    this.logger.output("ServerSocketHandleThread:OperationException:"+ex.getMessage(),2);
                    Thread.currentThread().interrupt();
-             }*/catch (Exception ex) {
+             }catch (Exception ex) {
                 
                    
                    this.logger.output("ServerSocketHandleThread:Exception:"+ex.getMessage());
