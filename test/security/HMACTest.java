@@ -4,6 +4,7 @@
  */
 package security;
 
+import java.security.NoSuchAlgorithmException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,7 +40,7 @@ public class HMACTest {
      * Test of generateHmac method, of class HMAC.
      */
     @Test
-    public void validateHMac() {
+    public void validateHMac() throws HMACException, NoSuchAlgorithmException {
        String serverMessage = "0.item1400bob";
        HMAC hmac = new HMAC();
        byte[] serverMessageHmac = hmac.generateHmac(serverMessage);

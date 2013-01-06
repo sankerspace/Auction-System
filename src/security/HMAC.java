@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security;
 
 import java.io.FileInputStream;
@@ -20,50 +16,58 @@ import org.bouncycastle.util.encoders.Hex;
  * @author Dave
  */
 public class HMAC {
-    
+
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HMAC.class.getSimpleName());
     private String plaintextWithHmac = null;
-    
+    Mac hMac = null;
+    Key secretKey = null;
+
+    public HMAC() throws HMACException, NoSuchAlgorithmException {
+        secretKey = getKey("keys/Clients/alice.key");
+        hMac = Mac.getInstance("HmacSHA256");
+    }
+
     /**
-     * Generates an Hmac from a message. Also a string will be created containing the message itself and the hash.
+     * Generates an Hmac from a message. Also a string will be created
+     * containing the message itself and the hash.
      *
      * @return Mac of the given message
      * @param message Message to which the hMac will be added
      */
-    public byte[] generateHmac(String message) {
+    public byte[] generateHmac(String message) throws HMACException {
         try {
-            Key secretKey = getKey("keys/Clients/alice.key");
-            Mac hMac = Mac.getInstance("HmacSHA256");
             hMac.init(secretKey);
             byte[] messageBytes = message.getBytes();
             hMac.update(messageBytes);
-            
+
             byte[] hmacByte = hMac.doFinal();
-            plaintextWithHmac = message+ " " + convertBytetoStringofDigits(hmacByte);
+            String h = new String(Base64Encoder.encodeBase64(hmacByte));
+            // plaintextWithHmac = message + " " + convertBytetoStringofDigits(hmacByte);
+            plaintextWithHmac = message + " " + h;
             return hmacByte;
         } catch (InvalidKeyException ex) {
-            ex.printStackTrace();
-            return null;
-        } catch (NoSuchAlgorithmException ex) {
-            ex.printStackTrace();
-            return null;
+            throw new HMACException("HMAC:InvalidKeyException:" + ex.getMessage());
         }
     }
 
     /**
-     * Extracts the plaintext and hash from a string. Generates a new hMac of the plaintext
-     * and compares it to the received hMac.
-     * @param plaintextWithHash String containing the plaintext and the hash in form of a string.
+     * Extracts the plaintext and hash from a string. Generates a new hMac of
+     * the plaintext and compares it to the received hMac.
+     *
+     * @param plaintextWithHash String containing the plaintext and the hash in
+     * form of a string.
      * @return true if byte arrays are equal. false otherwise.
      */
-    public boolean validateHMac(String plaintextWithHash){
+    public boolean validateHMac(String plaintextWithHash) throws HMACException {
         String[] splitted = plaintextWithHash.split(" ");
         String plaintext = splitted[0];
-        byte[] receivedHash = convertStringofDigitstoByte(splitted[1]);
+        //byte[] receivedHash = convertStringofDigitstoByte(splitted[1]);
+        byte[] receivedHash = Base64Encoder.decodeBase64(splitted[1].getBytes());
         byte[] computedHash = generateHmac(plaintext);
         return Arrays.equals(receivedHash, computedHash);
     }
-    
-    private Key getKey(String path) {
+
+    private Key getKey(String path) throws HMACException {
         try {
             FileInputStream fis = new FileInputStream(path);
             byte[] keyBytes = new byte[1024];
@@ -72,17 +76,16 @@ public class HMAC {
             byte[] input = Hex.decode(keyBytes);
             return new SecretKeySpec(input, "HmacSHA256");
         } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
+            throw new HMACException("HMAC:IOException:" + ex.getMessage());
         }
     }
 
     public String getPlaintextWithHmac() {
         return plaintextWithHmac;
     }
-    
-    /* Helping methods */
 
+    /* Helping methods TODO can be deleted after implemented with RSA sucessfully*/
+    
     public static String convertBytetoStringofDigits(byte[] b) {
         BigInteger big = new BigInteger(1, b);
         return big.toString(16);
