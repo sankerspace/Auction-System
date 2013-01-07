@@ -3,28 +3,18 @@ package auctionmanagement;
 import MyLogger.Log;
 import communication.Client;
 import communication.ClientException;
-
+import communication.Operation;
+import communication.OperationException;
+import communication.OperationSecure;
 import communication.OperationTCP;
-
 import communication.ServerUDP;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
-
-import MyLogger.Log;
-import auctionmanagement.CheckRequest.checkAuctionAnswer;
-import communication.Operation;
-import communication.OperationException;
-import communication.OperationSecure;
-import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.Executors;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import security.RSAAuthenticationException;
 
 /**
@@ -314,8 +304,9 @@ public class AuctionClient {
                                 }
                             }
                             out.output("AuctionClientTCPHandlerThread:OpSecure initialized.", 3);
-                        } else if(msg.contains("clientList")) {
+                        } else if(msg.contains("Active Clients:")) {
                             clientList = msg;
+                            out.output(msg);
                         } else
                             out.output(msg);
                     } else {
