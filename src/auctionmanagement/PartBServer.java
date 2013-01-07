@@ -38,14 +38,14 @@ public class PartBServer {
     
    public boolean checkandgetArguments()
     {
-        if(arguments.length != 6)
+        if(arguments.length != 5)
                   return false;
         tcpPort=Integer.valueOf(arguments[0]);
         analytic = arguments[1];
         billing=arguments[2];
         ServerPrivateKeyFilename=arguments[3];
         ClientKeyDirectoryname=arguments[4];
-        ServerKeyDirectoryname=arguments[5];
+        ServerKeyDirectoryname="keys/Server/";
         if(ServerPrivateKeyFilename.contains(".pem"))
             ServerPrivateKeyFilename=ServerPrivateKeyFilename.replace(".pem", "");
        
@@ -72,7 +72,7 @@ public class PartBServer {
             this.printUsage();
             return -1;
         }
-       Log output=new Log(new PrintWriter(System.out)); 
+       Log output=new Log(new PrintWriter(System.out),0); 
        
        
         try {
@@ -84,10 +84,11 @@ public class PartBServer {
                     output);
             auction.run();
         } catch (AuctionServerException e) {
-            output.output("PartBServer:"+e.getMessage());
-            auction.close();
+            output.output("AuctionServerException:"+e.getMessage());
+            if(auction!=null)
+                auction.close();
             output.close();
-            return -1;
+            return 0;
             
         }
         auction.close();

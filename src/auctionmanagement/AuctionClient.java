@@ -167,6 +167,7 @@ public class AuctionClient {
                             throw (new RequestException("You must be logged out!" + "\n"
                                     + this.userstatus.getUser() + ">"));
                         } else if (req.getCommandName().contains("!logout")) {
+                            operation.writeString("!dummy");
                             this.userstatus.resetUser();
                             this.handleTCP.setRegularChannel();
                         } else if (req.getCommandName().contains("!login")) {
@@ -288,37 +289,46 @@ public class AuctionClient {
         public void run()
         {
             String msg=null;
-
+            out.output("AuctionClientTCPHandlerThread is running..", 2);
             while(!Thread.currentThread().isInterrupted())
             {
-                out.output("AuctionClientTCPHandlerThread is running..", 2);
+                
+                
                 try {
                     if(!switchToSecureChannel)
                     {
                         
                         msg = op.readString();
                         if(msg.contains("!denied"))
-                        {
+                        {   opSecure=null;
+                            out.output("AuctionClientTCPHandlerThread:message:'!denied'", 3);
                             while((opSecure==null))
                             { 
                                 try {
+                                    
                                     Thread.sleep(500);
                                 } catch (InterruptedException ex) {
-                                   out.output("Wait after dummy messages finished.", 3);
+                                   
                                 }
                             }
+                            out.output("AuctionClientTCPHandlerThread:OpSecure initialized.", 3);
                         } else if(msg.contains("clientList")) {
                             clientList = msg;
                         } else
                             out.output(msg);
                     } else {
+                       
                         msg = opSecure.readString();
-                        out.output(msg);
+                        if(!msg.contains("!dummy"))
+                            out.output(msg);
                     }
 
-
                 } catch (OperationException ex) {
-                    out.output("AuctionClientTCPHandlerThread: OperationException");
+                    out.output("AuctionClientTCPHandlerThread:OperationException"+ex.getMessage());
+                    Thread.currentThread().interrupt();
+
+                }catch (Exception ex) {
+                    out.output("AuctionClientTCPHandlerThread:Exception"+ex.getMessage());
                     Thread.currentThread().interrupt();
 
                 }

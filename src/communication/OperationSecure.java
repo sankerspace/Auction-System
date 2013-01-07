@@ -113,8 +113,6 @@ public class OperationSecure implements Operation{
        
         try
         {
-            
-           
            this.rsaserver = new RSAServer(servername,clientkeydirectory,
                    serverkeydirectory);
            this.user=null;
@@ -144,7 +142,7 @@ public class OperationSecure implements Operation{
          this.in=op.in;
          this.lastReceivedMessageAfterRSAServerFailure=op.lastReceivedMessageAfterRSAServerFailure;
          this.out=op.out;
-         this.securechannel=this.securechannel;
+         this.securechannel=op.securechannel;
          this.user=op.user;
          this.userinfo=op.userinfo;
          this.rsaclient=op.rsaclient;
@@ -163,7 +161,7 @@ public class OperationSecure implements Operation{
          try{
              if(client.getClientType().contentEquals("client"))
                  throw new Exception("Wrong client type.");
-             this.client=(ClientSecure)client;
+             this.client=new ClientSecure(client);
              this.in=this.client.getInputStream();
              this.lastReceivedMessageAfterRSAServerFailure=null;
              this.out=this.client.getOutputStream();
@@ -233,7 +231,7 @@ public class OperationSecure implements Operation{
             tmp=this.securechannel.encrypt(s.getBytes());
             encrypted=new String(tmp);
             w.writeUTF(encrypted);
-            
+
         } catch (AESException e) {
            throw new OperationException("AESException::"+e.getMessage());
         }catch(IOException e)

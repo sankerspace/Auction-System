@@ -35,12 +35,12 @@ public class PartBClient {
        
         arguments=args;
          
-         output=new Log(new PrintWriter(System.out),0); 
+         output=new Log(new PrintWriter(System.out)); 
     }
     
    public boolean checkandgetArguments()
     {
-        if(arguments.length != 6)
+        if(arguments.length != 5)
                return false;
             host = this.arguments[0];
        try{
@@ -48,7 +48,7 @@ public class PartBClient {
             udpPort=Integer.parseInt(this.arguments[2]);
             ServerPublicKeyFilename=this.arguments[3];
             ClientKeyDirectoryname=this.arguments[4];
-            ServerKeyDirectoryname=this.arguments[5];
+            ServerKeyDirectoryname="keys/Server/";
             
             if(ServerPublicKeyFilename.contains(".pub.pem"))
                 ServerPublicKeyFilename=ServerPublicKeyFilename.replace(".pub.pem","");
@@ -101,10 +101,11 @@ public class PartBClient {
            
         } catch (AuctionClientException e) {
             output.output("AuctionClientException:"+e.getMessage());
-            auction.close();
+            if(auction!=null)
+                auction.close();
             output.close();
             
-            return -1;
+            return 0;
             
         }
          output.output("Closing PartB Client...",2);

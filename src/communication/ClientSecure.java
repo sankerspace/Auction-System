@@ -24,6 +24,7 @@ public class ClientSecure extends Client {
         this.cypher=null;
         this.user=null;
         this.userinfo=null; 
+        this.mode=false;
         this.type="clientsecure";
     }
     
@@ -35,6 +36,7 @@ public class ClientSecure extends Client {
        this.cypher=null;
        this.user=null;
        this.userinfo=null;  
+       this.mode=false;
        this.type="clientsecure";
     }
     
@@ -42,10 +44,22 @@ public class ClientSecure extends Client {
     {
          
         super(client);
+        if(!client.getClientType().contains("clientsecure"))
+        {
         this.cypher=null;
         this.user=null;
-        this.userinfo=null;  
+        this.userinfo=null;
+        this.mode=false;
+        }else
+        {
+            ClientSecure cl = (ClientSecure)client;
+            this.cypher=cl.cypher;
+            this.mode=cl.mode;
+            this.user=cl.user;
+            this.userinfo=cl.userinfo;
+        }
         this.type="clientsecure";
+        
     }
     
     protected AES getAES()

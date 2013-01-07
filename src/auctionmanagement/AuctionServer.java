@@ -66,6 +66,8 @@ public class AuctionServer implements Runnable{
             throw (new AuctionServerException("OperationException:"+e.getMessage()));
         }catch (RSAAuthenticationException e) {
             throw (new AuctionServerException("RSAAuthenticationException:"+e.getMessage()));
+        }catch (Exception e) {
+            throw (new AuctionServerException("Exception:"+e.getMessage()));
         }
         
         

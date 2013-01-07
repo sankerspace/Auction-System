@@ -4,6 +4,7 @@
  */
 package security;
 
+import communication.OperationException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -261,7 +262,8 @@ import utils.EasySecure;
         
         }
         
-        public void startServerAuthenticationProcedure(InputStream in,OutputStream out) throws RSAAuthenticationException
+        public void startServerAuthenticationProcedure(InputStream in,OutputStream out) 
+                throws RSAAuthenticationException, OperationException
         {
             
              
@@ -302,12 +304,16 @@ import utils.EasySecure;
             } catch (RSAAuthenticationException ex) {
                 try {
                     w.writeUTF(error);
-                } catch (IOException ex1) {  }
+                } catch (IOException ex1) { 
+                    throw new OperationException("IOException"+ex.getMessage());
+                }
                throw new RSAAuthenticationException(ex.getMessage());
             } catch (IOException ex) {
                 try {
                     w.writeUTF(error);
-                } catch (IOException ex1) {  }
+                } catch (IOException ex1) { 
+                    throw new OperationException("IOException"+ex.getMessage());
+                }
                throw new RSAAuthenticationException("IOException:"+ex.getMessage());
             }catch(Exception ex)
             {
