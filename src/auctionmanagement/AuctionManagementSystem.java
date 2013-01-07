@@ -14,6 +14,7 @@ import RMI.BillingServerInterface;
 import RMI.BillingServerSecure;
 import RMI.RMIRegistry;
 import RMI.RMIRegistryException;
+import communication.Client;
 import java.rmi.RemoteException;
 
 /**
@@ -345,9 +346,17 @@ public class AuctionManagementSystem implements Runnable {
                     if (iterator.hasNext()) {
                         while (iterator.hasNext()) {
                             Map.Entry<String, Account> entry = iterator.next();
-                            clientList.append("clientList;"+entry.getKey().toString() + "." + " '"
-                                    + entry.getValue().getName() + "' "
-                                    + entry.getValue().getClient().getDestinationHost() + "\n");
+                            clientList.append("Active Clients:\n");
+                            Client client_=entry.getValue().getClient();
+                            if(entry.getValue().isOnline()){
+                            clientList.append(
+                              client_.getDestinationHost()+
+                              ":"+
+                              client_.getDestinationPort()+
+                              " - "+
+                              entry.getValue().getName() 
+                              + "\n");
+                            }
                         }
                      //   clientList.setCharAt(clientList.length() - 1, ' ');
                     }
