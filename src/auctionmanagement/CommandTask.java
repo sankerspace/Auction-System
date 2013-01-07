@@ -15,6 +15,7 @@ public class CommandTask {
     Logout logout = null;
     Bid bid = null;
     End end = null;
+    Dummy dummy =null;
     ClientList clientList = null;
 
     public CommandTask(List list) {
@@ -50,6 +51,11 @@ public class CommandTask {
     public CommandTask(End end) {
         this.end = end;
         StrRepr = new StringBuffer(this.end.toString());
+    }
+    
+    public CommandTask(Dummy dummy) {
+        this.dummy=dummy;
+        StrRepr = new StringBuffer(this.dummy.toString());
     }
 
     public String toString() {
@@ -197,6 +203,24 @@ public class CommandTask {
 
             StrRepr = new StringBuffer("End:client:host" + this.client.getDestinationHost()
                     + "\n" + "End:client:port:" + this.client.getDestinationPort());
+
+        }
+
+        public String toString() {
+            return StrRepr.toString();
+        }
+    }
+    
+    public static class Dummy {
+
+        Client client = null;
+        StringBuffer StrRepr = null;
+
+        public Dummy(Client client) {
+            this.client = client;
+
+            StrRepr = new StringBuffer("Dummy:client:host" + this.client.getDestinationHost()
+                    + "\n" + "Dummy:client:port:" + this.client.getDestinationPort());
 
         }
 

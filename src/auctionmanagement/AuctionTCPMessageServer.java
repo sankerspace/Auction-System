@@ -10,6 +10,11 @@ import java.lang.Thread;
 import java.io.PrintWriter;
 import java.util.concurrent.LinkedBlockingQueue;
 import MyLogger.Log;
+import communication.Client;
+import communication.ClientException;
+import communication.ClientSecure;
+import communication.Operation;
+import communication.OperationSecure;
 
 /**
  *
@@ -29,23 +34,43 @@ public class AuctionTCPMessageServer implements Runnable{
     public void run()
     {
         errorlog.output("AuctionTCPMessageServerThread started...", 2);
-        OperationTCP op=null;
+        Operation op=null;
+        Client client=null;
         Answer r=null;
+        boolean b;
         while(!Thread.currentThread().isInterrupted())
         {
             try {
                 
                 
                 r=outgoinganswers.take();
-                op = new OperationTCP(r.getClient());
+                client=r.getClient();
+                b=client.getClientType().contains("clientsecure");
+                if(b)
+                {   
+                    ClientSecure clsec=(ClientSecure)client;
+                    if(clsec.isInSecuredMode())
+                        op=new OperationSecure(clsec);
+                    else
+                        op = new OperationTCP(client);
+                    
+                }else{
+                    op = new OperationTCP(client);
+                }
+                
                 op.writeString(r.getMessage());
                 
                errorlog.output("AuctionTCPMessageServerThread send a message:\n"+r.getMessage(), 3);  
-            } catch (InterruptedException ex) {
+            } catch (ClientException ex) {
+               errorlog.output("AuctionTCPMessageServerThread:ClientException"+ex.getMessage());
+            }catch (InterruptedException ex) {
                Thread.currentThread().interrupt();
-            }catch(OperationException e)
+            } catch(OperationException e)
             {
-                errorlog.output("AuctionTCPMessageServerThread:"+e.getMessage());
+                errorlog.output("AuctionTCPMessageServerThread:OperationException"+e.getMessage());
+            }  catch(Exception e)
+            {
+                errorlog.output("AuctionTCPMessageServerThread:Exception"+e.getMessage());
             }           
         }
         errorlog.output("AuctionTCPMessageServerThread end...", 2);

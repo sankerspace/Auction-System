@@ -16,6 +16,7 @@ import MyLogger.Log;
  */
 public class Client {
     private Socket clientsocket = null;
+    protected String type="client";
 
     /*
      * Konstruktor
@@ -49,6 +50,11 @@ public class Client {
            
        clientsocket = client.clientsocket; 
          
+    }
+    
+    public String getClientType()
+    {
+        return this.type;
     }
     
     

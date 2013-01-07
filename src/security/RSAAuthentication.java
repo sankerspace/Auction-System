@@ -67,10 +67,10 @@ public class RSAAuthentication {
             
             ServerKeydirectory=new File(ServerKeyDirectory);
             if(!ServerKeydirectory.isDirectory())
-                throw new RSAAuthenticationException("Constructor:Invalid Server Directory");
+                throw new RSAAuthenticationException("RSAAuthentication:Invalid Server Directory");
             ClientKeydirectory=new File(ClientKeyDirectory);
             if(!ClientKeydirectory.isDirectory())
-                throw new RSAAuthenticationException("Constructor:Invalid Client Directory");
+                throw new RSAAuthenticationException("RSAAuthentication:Invalid Client Directory");
            log.info("Initialized key directories.");
             
 
@@ -82,13 +82,13 @@ public class RSAAuthentication {
              log.info("Initialized ciphers.");
             
         } catch (NoSuchProviderException ex) {
-            throw new RSAAuthenticationException("Constructor:NoSuchProviderException:"+
+            throw new RSAAuthenticationException("RSAAuthentication:NoSuchProviderException:"+
                    ex.getMessage());
         } catch (NoSuchPaddingException ex) {
-           throw new RSAAuthenticationException("Constructor:NoSuchPaddingException:"+
+           throw new RSAAuthenticationException("RSAAuthentication:NoSuchPaddingException:"+
                    ex.getMessage());
         } catch (NoSuchAlgorithmException ex) {
-           throw new RSAAuthenticationException("Constructor:NoSuchAlgorithmException:"+
+           throw new RSAAuthenticationException("RSAAuthentication:NoSuchAlgorithmException:"+
                    ex.getMessage());
         }
         
@@ -133,10 +133,10 @@ public class RSAAuthentication {
                     System.out.println("Enter pass phrase:");
                     char[] array=null;
                     String line=null;
-                    BufferedReader input=null;
+                    BufferedReader input_=null;
                     try {
-                        input = new BufferedReader(new InputStreamReader(System.in));
-                        while((line=input.readLine())!=null)
+                        input_ = new BufferedReader(new InputStreamReader(System.in));
+                        while((line=input_.readLine())!=null)
                         {
                             break;
                         }
@@ -146,12 +146,12 @@ public class RSAAuthentication {
                     }catch (Exception ex) {
                         log.error(ex.getMessage());
                     }finally
-                    {
+                    {/*
                         try {
-                            input.close();
+                            input_.close();
                         } catch (IOException ex) {
                             
-                        }
+                        }*/
                     }
                     return array;
     

@@ -58,8 +58,11 @@ public class Request {
         }
     }
 
-    public Request(Client client, String message) {
+    public Request(Client client, String message) throws RequestException {
         CheckRequest check = new CheckRequest(message, false);
+        if (!check.getStatus()) {
+            throw (new RequestException("Message is invalid."));
+        }
         this.client = client;
         this.command = check.getCommand();
         this.parameter = check.getParam();

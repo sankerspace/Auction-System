@@ -101,6 +101,20 @@ public class Account {
         this.udpport=-1;
         
     }
+    public void deactivateAccountandCloseConnection() throws ClientException
+    {
+        try {
+            this.TCPClient.closeSocket();
+        } catch (ClientException ex) {
+           throw new ClientException(ex.getMessage());
+        }finally{
+        this.TCPClient=null;
+        this.client_host=null;
+        this.tcpport=-1;
+        this.udpport=-1;
+        }
+        
+    }
     
     public boolean hasNotifications()
     {
