@@ -348,23 +348,18 @@ public class AuctionManagementSystem implements Runnable {
                         clientList.append("Active Clients:\n");
                         while (iterator.hasNext()) {
                             Map.Entry<String, Account> entry = iterator.next();
-                            Client client_=entry.getValue().getClient();
-                            System.out.println("CommandTaskName: " + this.commandtask.clientList.name);
-                             System.out.println("Entry Client Name " + entry.getValue().getName());
-                            if(entry.getValue().isOnline() && !this.commandtask.clientList.name.equals(entry.getValue().getName())){
-                            clientList.append(
-                              client_.getDestinationHost()+
-                              ":"+
-                              client_.getDestinationPort()+
-                              " - "+
-                              entry.getValue().getName() 
-                              + "\n");
+                            Client client_ = entry.getValue().getClient();
+                            if (entry.getValue().isOnline() && !this.commandtask.clientList.name.equals(entry.getValue().getName())) {
+                                clientList.append(
+                                        client_.getDestinationHost()
+                                        + ":"
+                                        + client_.getDestinationPort()
+                                        + " - "
+                                        + entry.getValue().getName()
+                                        + "\n");
                             }
                         }
-                     //   clientList.setCharAt(clientList.length() - 1, ' ');
                     }
-                    //TODO add client list(account_map) to client class
-                    //Client.setAviableClientsList(account_map), ask marco how to do that exactly
 
                     Answer a = new Answer(clientList.toString(), this.commandtask.clientList.client);
                     outgoingmessagechannel.offer(a);
@@ -403,17 +398,24 @@ public class AuctionManagementSystem implements Runnable {
                                         StringBuffer clientList = new StringBuffer();
                                         Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
                                         if (iterator.hasNext()) {
+                                            clientList.append("Active Clients:\n");
                                             while (iterator.hasNext()) {
                                                 Map.Entry<String, Account> entry = iterator.next();
-                                                clientList.append("clientList;"+entry.getKey().toString() + "." + " '"
-                                                        + entry.getValue().getName() + "' "
-                                                        + entry.getValue().getClient().getDestinationHost() + "\n");
+                                                Client client_ = entry.getValue().getClient();
+                                                if (entry.getValue().isOnline() && !this.commandtask.clientList.name.equals(entry.getValue().getName())) {
+                                                    clientList.append(
+                                                            client_.getDestinationHost()
+                                                            + ":"
+                                                            + client_.getDestinationPort()
+                                                            + " - "
+                                                            + entry.getValue().getName()
+                                                            + "\n");
+                                                }
                                             }
-                                        //    clientList.setCharAt(clientList.length() - 1, ' ');
                                         }
 
-                                        //TODO add client list(account_map) to client class
-                                        //Client.setAviableClientsList(account_map), ask marco how to do that exactly
+                                        a = new Answer(clientList.toString(), this.commandtask.clientList.client);
+                                        outgoingmessagechannel.offer(a);
 
                                         logger.output("AMSHandlerThread:login:RMI"
                                                 + ":processEvent:Invoke::"
@@ -464,17 +466,24 @@ public class AuctionManagementSystem implements Runnable {
                                     StringBuffer clientList = new StringBuffer();
                                     Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
                                     if (iterator.hasNext()) {
+                                        clientList.append("Active Clients:\n");
                                         while (iterator.hasNext()) {
                                             Map.Entry<String, Account> entry = iterator.next();
-                                            clientList.append("clientList;"+entry.getKey().toString() + "." + " '"
-                                                    + entry.getValue().getName() + "' "
-                                                    + entry.getValue().getClient().getDestinationHost() + "\n");
+                                            Client client_ = entry.getValue().getClient();
+                                            if (entry.getValue().isOnline() && !this.commandtask.clientList.name.equals(entry.getValue().getName())) {
+                                                clientList.append(
+                                                        client_.getDestinationHost()
+                                                        + ":"
+                                                        + client_.getDestinationPort()
+                                                        + " - "
+                                                        + entry.getValue().getName()
+                                                        + "\n");
+                                            }
                                         }
-                                      //  clientList.setCharAt(clientList.length() - 1, ' ');
                                     }
 
-                                    //TODO add client list(account_map) to client class
-                                    //Client.setAviableClientsList(account_map), ask marco how to do that exactly
+                                    a = new Answer(clientList.toString(), this.commandtask.clientList.client);
+                                    outgoingmessagechannel.offer(a);
 
                                     logger.output("AMSHandlerThread:login:RMI"
                                             + ":processEvent:Invoke::"
@@ -594,9 +603,9 @@ public class AuctionManagementSystem implements Runnable {
                              */
 
                             /*TODO Stage4:ask marco, right place to start server outage? --> NO! 1. Implement "!closeConnections" First active connections
-                            *need to be closed, then closer ServerSocket (ServerSocketHandleThread) so no new AuctionTCPReadHandlers can be started
-                            * 2. Implement "!reactivateConnection" in AuctionClient which starts the ServerSocket again
-                            */
+                             *need to be closed, then closer ServerSocket (ServerSocketHandleThread) so no new AuctionTCPReadHandlers can be started
+                             * 2. Implement "!reactivateConnection" in AuctionClient which starts the ServerSocket again
+                             */
                             startOutageProcess(); //ask marco if thats ok here at this point
                             /*
                              * END Stage4:startProcess()

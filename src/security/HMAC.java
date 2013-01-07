@@ -2,7 +2,6 @@ package security;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -42,7 +41,6 @@ public class HMAC {
 
             byte[] hmacByte = hMac.doFinal();
             String h = new String(Base64Encoder.encodeBase64(hmacByte));
-            // plaintextWithHmac = message + " " + convertBytetoStringofDigits(hmacByte);
             plaintextWithHmac = message + " " + h;
             return hmacByte;
         } catch (InvalidKeyException ex) {
@@ -61,7 +59,6 @@ public class HMAC {
     public boolean validateHMac(String plaintextWithHash) throws HMACException {
         String[] splitted = plaintextWithHash.split(" ");
         String plaintext = splitted[0];
-        //byte[] receivedHash = convertStringofDigitstoByte(splitted[1]);
         byte[] receivedHash = Base64Encoder.decodeBase64(splitted[1].getBytes());
         byte[] computedHash = generateHmac(plaintext);
         return Arrays.equals(receivedHash, computedHash);
@@ -82,18 +79,5 @@ public class HMAC {
 
     public String getPlaintextWithHmac() {
         return plaintextWithHmac;
-    }
-
-    /* Helping methods TODO can be deleted after implemented with RSA sucessfully*/
-    
-    public static String convertBytetoStringofDigits(byte[] b) {
-        BigInteger big = new BigInteger(1, b);
-        return big.toString(16);
-    }
-
-    public static byte[] convertStringofDigitstoByte(String s) {
-        BigInteger big = new BigInteger(s, 16);
-        return big.toByteArray();
-
     }
 }
