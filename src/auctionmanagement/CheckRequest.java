@@ -148,6 +148,7 @@ public class CheckRequest {
                 parameter.bidId=id;
                 parameter.bidValue=amount;   
             }catch(NumberFormatException e){return false;}
+            return true;
         }else if(command.contains("!end")){
             parameter=null;
             return true;

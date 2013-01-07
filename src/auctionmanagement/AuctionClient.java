@@ -36,6 +36,7 @@ public class AuctionClient {
     private final ExecutorService pool;
     private ServerUDP serverUDP = null;
     private int udpPort;
+    private boolean isLoginTry=false;
     private  String ServerPublicKeyFilename=null;
     private  String ClientKeyDirectoryname=null;
     private  String ServerKeyDirectoryname=null;
@@ -139,6 +140,7 @@ public class AuctionClient {
                         if (req.getCommandName().contains("!end")) {
                             break;
                         } else if (req.getCommandName().contains("!login")) {
+                            this.isLoginTry=true;
                             operation.writeString("!dummy");
                            
                             String user=req.getUserName();
@@ -152,11 +154,11 @@ public class AuctionClient {
                             this.userstatus.setUser(req.getUserName());
                             req=null;
                             //req.setUdpPort(this.udpPort);
-                        } else if (!req.getCommandName().contains("!list")) {
+                        } else if (req.getCommandName().contains("!getClientList")) {  //TODO Stage4:test this line
                             throw (new RequestException("You must be logged in!\n>"));
-                        } else if (!req.getCommandName().contains("!getClientList")) {  //TODO Stage4:test this line
+                        }else if (!(req.getCommandName().contains("!list"))) {
                             throw (new RequestException("You must be logged in!\n>"));
-                        }
+                        } 
                     } else {
                         if (line.length() < 4) {
                             continue;
@@ -297,12 +299,12 @@ public class AuctionClient {
                 try {
                     if(!switchToSecureChannel)
                     {
-                        
+                       opSecure=null;
                         msg = op.readString();
                         if(msg.contains("!denied"))
-                        {   opSecure=null;
+                        {   
                             out.output("AuctionClientTCPHandlerThread:message:'!denied'", 3);
-                            while((opSecure==null))
+                            while((opSecure==null)&&isLoginTry)
                             { 
                                 try {
                                     
@@ -350,6 +352,7 @@ public class AuctionClient {
             this.switchToSecureChannel=false;
             //this.opSecure=null;
             this.op = new OperationTCP(this.client);
+            isLoginTry=false;
         }
 
     }
