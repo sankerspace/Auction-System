@@ -130,7 +130,6 @@ public class AuctionTCPReadHandler implements Runnable{
                               }
 
                               com = this.ExtractInfo(new Request(this.client,message)); 
-
                               this.queue.offer(com); 
                                logger.output("ServerSocketHandleThread received"
                                        +" message and forwarded a CommandTask Object to AMSThread:\n"
