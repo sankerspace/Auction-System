@@ -115,8 +115,9 @@ public class Request {
             return new String("!bid" + " " + this.user + " " + parameter.bidId + " " + parameter.bidValue);
         } else if (this.command.contains("!end")) {
             return new String("!end");
+        } else if (this.command.contains("!getClientList")) {
+            return new String("!getClientList" + " " + this.user);
         }
-
         return null;
     }
 

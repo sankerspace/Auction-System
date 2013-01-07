@@ -86,6 +86,11 @@ public class AuctionTCPReadHandler implements Runnable{
                c= new CommandTask(l);
             
             }
+            else if(command.contains("!getClientList"))
+            {
+               CommandTask.ClientList l = new CommandTask.ClientList(r.getClient(),r.getUserName());
+               c= new CommandTask(l);
+            }
             else if(command.contains("dummy"))
             {
                CommandTask.Dummy l = new CommandTask.Dummy(r.getClient());

@@ -15,6 +15,7 @@ import RMI.BillingServerSecure;
 import RMI.RMIRegistry;
 import RMI.RMIRegistryException;
 import communication.Client;
+import communication.ClientSecure;
 import java.rmi.RemoteException;
 
 /**
@@ -344,11 +345,13 @@ public class AuctionManagementSystem implements Runnable {
                     StringBuffer clientList = new StringBuffer();
                     Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
                     if (iterator.hasNext()) {
+                        clientList.append("Active Clients:\n");
                         while (iterator.hasNext()) {
                             Map.Entry<String, Account> entry = iterator.next();
-                            clientList.append("Active Clients:\n");
                             Client client_=entry.getValue().getClient();
-                            if(entry.getValue().isOnline()){
+                            System.out.println("CommandTaskName: " + this.commandtask.clientList.name);
+                             System.out.println("Entry Client Name " + entry.getValue().getName());
+                            if(entry.getValue().isOnline() && !this.commandtask.clientList.name.equals(entry.getValue().getName())){
                             clientList.append(
                               client_.getDestinationHost()+
                               ":"+

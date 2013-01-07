@@ -90,6 +90,9 @@ public class CheckRequest {
         }else if(command.contains("!end")){
             parameter=null;
             return true;
+        } else if(command.contains("!getClientList")){
+            parameter=null;
+            return true;
         }
         
          return false;
@@ -155,7 +158,14 @@ public class CheckRequest {
         }else if(command.contains("!dummy")){
             parameter=null;
             return true;
-        }  
+        }else if(command.contains("!getClientList")){
+            parameter=new Request.Parameter();
+            if(tokenizedMessage.length != 2) {
+                return false;
+            }
+            parameter.loginuser = tokenizedMessage[1];
+            return true;
+        }
             
          return false;
     }

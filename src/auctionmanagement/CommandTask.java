@@ -66,11 +66,14 @@ public class CommandTask {
 
         Client client = null;
         StringBuffer StrRepr = null;
+        String name = null;
 
-        public ClientList(Client client) {
+        public ClientList(Client client, String name) {
             this.client = client;
+            this.name = name;
             StrRepr = new StringBuffer("ClientList:client:host" + this.client.getDestinationHost()
-                    + "\nClientList:client:port:" + this.client.getDestinationPort());
+                    + "\nClientList:client:port:" + this.client.getDestinationPort() + 
+                    "\nClientList:client:name:" + this.name);
         }
 
         public String toString() {
