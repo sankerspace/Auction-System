@@ -133,8 +133,8 @@ public class AuctionTCPReadHandler implements Runnable{
                                   op=null;
                                   client.setUnsecuredChannel();
                               }
-
-                              com = this.ExtractInfo(new Request(this.client,message)); 
+                              ClientSecure clsec=new ClientSecure(this.client);
+                              com = this.ExtractInfo(new Request(clsec,message)); 
                               this.queue.offer(com); 
                                logger.output("ServerSocketHandleThread received"
                                        +" message and forwarded a CommandTask Object to AMSThread:\n"

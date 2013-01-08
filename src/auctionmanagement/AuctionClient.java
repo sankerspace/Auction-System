@@ -161,7 +161,6 @@ public class AuctionClient {
                         } else if (req.getCommandName().contains("!logout")) {
                             operation.writeString("!dummy");
                             this.userstatus.resetUser();
-                            this.handleTCP.setRegularChannel();
                         } else if (req.getCommandName().contains("!login")) {
                             throw (new RequestException("You must log out!" + "\n"
                                     + this.userstatus.getUser() + ">"));
@@ -289,15 +288,14 @@ public class AuctionClient {
                 try {
                     if(!switchToSecureChannel)
                     {
-                       opSecure=null;
+                       
                         msg = op.readString();
                         if(msg.contains("!denied"))
                         {   
                             out.output("AuctionClientTCPHandlerThread:message:'!denied'", 3);
                             while((opSecure==null)&&isLoginTry)
                             { 
-                                try {
-                                    
+                                try {   
                                     Thread.sleep(500);
                                 } catch (InterruptedException ex) {
                                    
@@ -312,8 +310,14 @@ public class AuctionClient {
                     } else {
                        
                         msg = opSecure.readString();
-                        if(!msg.contains("!dummy"))
+                        if(msg.contains("!dummy"))
+                        {
+                            this.setRegularChannel();
+                            this.opSecure=null;
+                        }else
+                        {
                             out.output(msg);
+                        }
                     }
 
                 } catch (OperationException ex) {

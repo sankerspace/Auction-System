@@ -35,6 +35,7 @@ public class AuctionTCPMessageServer implements Runnable{
     {
         errorlog.output("AuctionTCPMessageServerThread started...", 2);
         Operation op=null;
+
         Client client=null;
         Answer r=null;
         boolean b;
