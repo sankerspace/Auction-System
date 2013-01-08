@@ -1,29 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package auctionmanagement;
 
-import auctionmanagement.AuctionManagementSystem;
-import communication.OperationTCP;
-import communication.OperationException;
-import communication.Server;
-import communication.Server.Handler;
-import communication.ServerException;
-import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
 import MyLogger.Log;
-import communication.Client;
-import communication.ClientException;
+import communication.OperationException;
 import communication.OperationSecure;
+import communication.Server;
+import communication.ServerException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import security.RSAAuthenticationException;
-
-
 
 /**
  *
@@ -85,6 +74,11 @@ public class AuctionServer implements Runnable{
                 output.out("\n:");
                 while((line=input.readLine())!=null)
                 {
+                    if(line.contains("!close")) {
+                        //TODO FIX!!
+                 //       CommandTask close = new CommandTask.CloseConnection();
+                 //       this.queue.offer(close);
+                    }
                     //this.queue.offer(Commandtask); nur für !closeconnection
                     Thread.currentThread().interrupt();
                     //server.shutdown();
@@ -105,9 +99,7 @@ public class AuctionServer implements Runnable{
                   
                 }//while
                 } catch (IOException e) {
-                            
-                    this.output.output("AuctionServerThread:IOException:"+e.getMessage()); 
-                        
+                    this.output.output("AuctionServerThread:IOException:"+e.getMessage());
                 }
            
         } //while(!Thread.
@@ -170,7 +162,6 @@ public class AuctionServer implements Runnable{
            this.op=op;
        }
        
-       
        public void run()
        {
            AuctionTCPReadHandler handler = new AuctionTCPReadHandler(
@@ -181,11 +172,5 @@ public class AuctionServer implements Runnable{
            this.pool.execute(handler);
        
        }
-
     }
-    
-    
-    
-    
-    
 }
