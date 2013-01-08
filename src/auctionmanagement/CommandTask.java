@@ -15,8 +15,9 @@ public class CommandTask {
     Logout logout = null;
     Bid bid = null;
     End end = null;
-    Dummy dummy =null;
+    Dummy dummy = null;
     ClientList clientList = null;
+    CloseConnection closeConnection = null;
 
     public CommandTask(List list) {
         this.list = list;
@@ -52,10 +53,15 @@ public class CommandTask {
         this.end = end;
         StrRepr = new StringBuffer(this.end.toString());
     }
-    
+
     public CommandTask(Dummy dummy) {
-        this.dummy=dummy;
+        this.dummy = dummy;
         StrRepr = new StringBuffer(this.dummy.toString());
+    }
+
+    public CommandTask(CloseConnection closeConnection) {
+        this.closeConnection = closeConnection;
+        StrRepr = new StringBuffer(this.closeConnection.toString());
     }
 
     public String toString() {
@@ -72,8 +78,8 @@ public class CommandTask {
             this.client = client;
             this.name = name;
             StrRepr = new StringBuffer("ClientList:client:host" + this.client.getDestinationHost()
-                    + "\nClientList:client:port:" + this.client.getDestinationPort() + 
-                    "\nClientList:client:name:" + this.name);
+                    + "\nClientList:client:port:" + this.client.getDestinationPort()
+                    + "\nClientList:client:name:" + this.name);
         }
 
         public String toString() {
@@ -213,7 +219,7 @@ public class CommandTask {
             return StrRepr.toString();
         }
     }
-    
+
     public static class Dummy {
 
         Client client = null;
@@ -225,6 +231,20 @@ public class CommandTask {
             StrRepr = new StringBuffer("Dummy:client:host" + this.client.getDestinationHost()
                     + "\n" + "Dummy:client:port:" + this.client.getDestinationPort());
 
+        }
+
+        public String toString() {
+            return StrRepr.toString();
+        }
+    }
+
+    public static class CloseConnection {
+
+        Client client = null;
+        StringBuffer StrRepr = null;
+
+        public CloseConnection() {
+            StrRepr = new StringBuffer("CloseConnection");
         }
 
         public String toString() {

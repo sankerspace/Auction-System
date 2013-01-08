@@ -845,6 +845,10 @@ public class AuctionManagementSystem implements Runnable {
                 Answer a = new Answer("!dummy", this.commandtask.dummy.client);
                 outgoingmessagechannel.offer(a);
 
+            } else if (this.commandtask.closeConnection != null) {
+                
+                //go through all active clients and close their connections
+                
             }
 
 
