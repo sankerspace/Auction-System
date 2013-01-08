@@ -20,16 +20,18 @@ import security.RSAServer;
  */
 public class OperationSecure implements Operation {
 
-    private ClientSecure client = null;
-    private OutputStream out = null;
-    private InputStream in = null;
+    protected ClientSecure client = null;
+    protected OutputStream out = null;
+    protected InputStream in = null;
     /*Secure parameters*/
     private RSAServer rsaserver = null;
     private RSAClient rsaclient = null;
-    private AES securechannel = null;
-    private String user = null;
-    private String userinfo = null;
+    protected AES securechannel = null;
+    protected String user = null;
+    protected String userinfo = null;
     private String lastReceivedMessageAfterRSAServerFailure = null;
+    private String ClientKeyDirectory=null;
+   
     /*
      * Konstruktor for client side
      * secure connection etablished immediately
@@ -43,14 +45,14 @@ public class OperationSecure implements Operation {
             out = client.getOutputStream();
             this.user = clientname;
             this.userinfo = userinfo;
-
+            this.ClientKeyDirectory=clientkeydirectory;
 
             RSAClient rsaclient = new RSAClient(clientname, userinfo, servername,
                     clientkeydirectory, serverkeydirectory);
             rsaclient.startClientAuthenticationProcedure(in, out);
             this.securechannel = rsaclient.getAES();
 
-            client.setSecuredChannel(securechannel, user, userinfo);
+            client.setSecuredChannel(securechannel, user, userinfo,clientkeydirectory);
 
         } catch (ClientException e) {
             throw new OperationException("ClientException::" + e.getMessage());
@@ -76,8 +78,8 @@ public class OperationSecure implements Operation {
             this.user = server.getUsername();
             this.userinfo = server.getUserInfo();
             this.securechannel = server.getAES();
-
-            client.setSecuredChannel(securechannel, user, userinfo);
+            this.ClientKeyDirectory=clientkeydirectory;
+            client.setSecuredChannel(securechannel, user, userinfo,clientkeydirectory);
         } catch (NullPointerException e) {
             throw new OperationException("NullPointerException::" + e.getMessage());
         } catch (ClientException e) {
@@ -104,7 +106,7 @@ public class OperationSecure implements Operation {
             this.user = null;
             this.userinfo = null;
             this.securechannel = null;
-
+            this.ClientKeyDirectory=clientkeydirectory;
             this.client = null;
         } catch (NullPointerException e) {
             throw new OperationException("NullPointerException::" + e.getMessage());
@@ -130,7 +132,7 @@ public class OperationSecure implements Operation {
         this.userinfo = op.userinfo;
         this.rsaclient = op.rsaclient;
         this.rsaserver = op.rsaserver;
-
+        this.ClientKeyDirectory=op.ClientKeyDirectory;
     }
 
     /**
@@ -153,6 +155,7 @@ public class OperationSecure implements Operation {
             this.userinfo = this.client.getUserinfo();
             this.rsaclient = null;
             this.rsaserver = null;
+            this.ClientKeyDirectory=this.client.getClientKeyDirectory();
 
         } catch (NullPointerException ex) {
             throw new ClientException("Wrong client type:" + ex.getMessage());
@@ -182,7 +185,7 @@ public class OperationSecure implements Operation {
             this.userinfo = rsaserver.getUserInfo();
             this.securechannel = rsaserver.getAES();
 
-            clientsecure.setSecuredChannel(securechannel, user, userinfo);
+            clientsecure.setSecuredChannel(securechannel, user, userinfo,ClientKeyDirectory);
 
         } catch (NullPointerException e) {
             throw new OperationException("NullPointerException::" + e.getMessage());
@@ -214,31 +217,7 @@ public class OperationSecure implements Operation {
         }
     }
 
-    public void writeStringWithHMac(String s) throws OperationException, HMACException, NoSuchAlgorithmException {
-        String encrypted = null;
-        byte[] tmp = null;
-        DataOutputStream w = null;
-        try {
-            //Append HMac to plaintext
-            HMAC hmac = new HMAC();
-            byte[] plaintextByte = hmac.generateHmac(s);
-            
-            w = new DataOutputStream(out);
-            
-            //Old version
-            //tmp = this.securechannel.encrypt(s.getBytes());
-            
-            //New version
-            tmp = this.securechannel.encrypt(plaintextByte);
-            encrypted = new String(tmp);
-            w.writeUTF(encrypted);
-        } catch (AESException e) {
-            throw new OperationException("AESException::" + e.getMessage());
-        } catch (IOException e) {
-            throw new OperationException("IOException::" + e.getMessage());
-        }
-    }
-
+   
     public String readString() throws OperationException {
         String decrypted = null, s = null;
         byte[] tmp = null;
@@ -267,5 +246,10 @@ public class OperationSecure implements Operation {
 
     public String getLastMessageAfterRSAServerFailure() {
         return this.lastReceivedMessageAfterRSAServerFailure;
+    }
+    
+    public String getClientKeyDirectory()
+    {
+        return this.ClientKeyDirectory;
     }
 }

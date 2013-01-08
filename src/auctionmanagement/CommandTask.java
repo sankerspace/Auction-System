@@ -18,10 +18,16 @@ public class CommandTask {
     Dummy dummy = null;
     ClientList clientList = null;
     CloseConnection closeConnection = null;
+    ListDummy listdummy=null;
 
     public CommandTask(List list) {
         this.list = list;
         StrRepr = new StringBuffer(this.list.toString());
+    }
+    
+    public CommandTask(ListDummy listdummy) {
+        this.listdummy = listdummy;
+        StrRepr = new StringBuffer(this.listdummy.toString());
     }
 
     public CommandTask(ClientList clientList) {
@@ -230,6 +236,24 @@ public class CommandTask {
 
             StrRepr = new StringBuffer("Dummy:client:host" + this.client.getDestinationHost()
                     + "\n" + "Dummy:client:port:" + this.client.getDestinationPort());
+
+        }
+
+        public String toString() {
+            return StrRepr.toString();
+        }
+    }
+    
+    public static class ListDummy {
+
+        Client client = null;
+        StringBuffer StrRepr = null;
+
+        public ListDummy(Client client) {
+            this.client = client;
+
+            StrRepr = new StringBuffer("ListDummy:client:host" + this.client.getDestinationHost()
+                    + "\n" + "ListDummy:client:port:" + this.client.getDestinationPort());
 
         }
 

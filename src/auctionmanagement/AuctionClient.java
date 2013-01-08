@@ -6,15 +6,21 @@ import communication.ClientException;
 import communication.Operation;
 import communication.OperationException;
 import communication.OperationSecure;
+import communication.OperationSecurewithHmac;
 import communication.OperationTCP;
 import communication.ServerUDP;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import security.RSAAuthenticationException;
 
 /**
@@ -38,6 +44,7 @@ public class AuctionClient {
     private Operation operation=null;
     private String clientList = null; //Stage4:List of clients, filled by !getClientList command
     private ReentrantLock lock; //for synced communication between AuctionClient and AuctionTCPHandler
+    
 
     public AuctionClient(String host, int tcpPort, int udpPort,
             String ServerPublicKeyFilename,
@@ -115,12 +122,14 @@ public class AuctionClient {
         try {
             //without login only regular channel to the server is established
             operation = new OperationTCP(this.clientTCP);
-           
+            
             while((line=in.readLine())!=null)
-            {
+            {   
+               
+
                 this.errorlog.output("AuctionClient input:"+line,3);
                 try{
-                   
+                  
                    if(this.userstatus.noUser()) 
                    {
                         if(line.length()<4)continue;
@@ -266,7 +275,7 @@ public class AuctionClient {
         private Log out=null;
         private Client client=null;
         boolean switchToSecureChannel=false;
-        OperationSecure opSecure=null;
+        OperationSecurewithHmac opSecurewithHmac=null;
         OperationTCP op=null;
         
         public AuctionClientTCPHandler(Client client,Log out) throws OperationException
@@ -293,7 +302,7 @@ public class AuctionClient {
                         if(msg.contains("!denied"))
                         {   
                             out.output("AuctionClientTCPHandlerThread:message:'!denied'", 3);
-                            while((opSecure==null)&&isLoginTry)
+                            while((opSecurewithHmac==null)&&isLoginTry)
                             { 
                                 try {   
                                     Thread.sleep(500);
@@ -309,11 +318,11 @@ public class AuctionClient {
                             out.output(msg);
                     } else {
                        
-                        msg = opSecure.readString();
+                        msg = opSecurewithHmac.readString();
                         if(msg.contains("!dummy"))
                         {
                             this.setRegularChannel();
-                            this.opSecure=null;
+                            this.opSecurewithHmac=null;
                         }else
                         {
                             out.output(msg);
@@ -335,10 +344,10 @@ public class AuctionClient {
             
         } 
         
-        public void setSecureChannel(Operation op)
+        public void setSecureChannel(Operation op) throws OperationException
         {
            this.switchToSecureChannel=true; 
-           this.opSecure=new OperationSecure((OperationSecure)op);
+           this.opSecurewithHmac=new OperationSecurewithHmac((OperationSecure)op);
            //this.op=null;
         }
         

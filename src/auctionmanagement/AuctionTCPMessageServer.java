@@ -15,6 +15,12 @@ import communication.ClientException;
 import communication.ClientSecure;
 import communication.Operation;
 import communication.OperationSecure;
+import communication.OperationSecurewithHmac;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import security.AES;
+import security.AESException;
+import security.AESwithHMAC;
 
 /**
  *
@@ -46,15 +52,19 @@ public class AuctionTCPMessageServer implements Runnable{
                 
                 r=outgoinganswers.take();
                 client=r.getClient();
+                OperationSecure opsec=null;
                 b=client.getClientType().contains("clientsecure");
                 if(b)
                 {   
                     ClientSecure clsec=(ClientSecure)client;
                     if(clsec.isInSecuredMode())
-                        op=new OperationSecure(clsec);
-                    else
+                    {
+                        opsec=new OperationSecure(clsec);
+                        op=new OperationSecurewithHmac(opsec);
+                    }
+                    else{
                         op = new OperationTCP(client);
-                    
+                    }
                 }else{
                     op = new OperationTCP(client);
                 }
@@ -77,5 +87,6 @@ public class AuctionTCPMessageServer implements Runnable{
         errorlog.output("AuctionTCPMessageServerThread end...", 2);
         
     }
-            
+    
+          
 }

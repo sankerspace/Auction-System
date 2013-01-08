@@ -100,6 +100,10 @@ public class Client {
     {
        return clientsocket.getInetAddress().getHostAddress();
     }
+    public int getLocalPort()
+    {
+        return this.clientsocket.getLocalPort();
+    }
     
     public int getDestinationPort()
     {
