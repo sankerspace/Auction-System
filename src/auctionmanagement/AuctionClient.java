@@ -63,6 +63,12 @@ public class AuctionClient {
 
             
         } catch (OperationException e) {
+            
+            //Stage4:If server not reachable, startOutageProcess()
+            
+            
+            
+            
             throw (new AuctionClientException(":OperationException:",e));
 
         } catch (ClientException e) {
@@ -96,8 +102,16 @@ public class AuctionClient {
 
             
         } catch (OperationException e) {
-           throw (new AuctionClientException(":OperationException:",e));
 
+            //Stage4:If server not reachable, startOutageProcess()
+            
+            
+           
+           
+           
+           throw (new AuctionClientException(":OperationException:",e));
+           
+           
         } catch (ClientException e) {
             throw (new AuctionClientException(":ClientException:", e));
         }/* catch (ServerUDPException e) {

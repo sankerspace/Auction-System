@@ -113,7 +113,6 @@ public class Account {
         this.tcpport=-1;
         this.udpport=-1;
         }
-        
     }
     
     public boolean hasNotifications()

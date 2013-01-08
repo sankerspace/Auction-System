@@ -15,6 +15,7 @@ import RMI.BillingServerSecure;
 import RMI.RMIRegistry;
 import RMI.RMIRegistryException;
 import communication.Client;
+import communication.ClientException;
 import communication.ClientSecure;
 import java.rmi.RemoteException;
 
@@ -29,6 +30,8 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AuctionManagementSystem implements Runnable {
 
@@ -846,9 +849,19 @@ public class AuctionManagementSystem implements Runnable {
                 outgoingmessagechannel.offer(a);
 
             } else if (this.commandtask.closeConnection != null) {
-                
-                //go through all active clients and close their connections
-                
+                    Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
+                    if (iterator.hasNext()) {
+                        while (iterator.hasNext()) {
+                            try {
+                                Map.Entry<String, Account> entry = iterator.next();
+                                entry.getValue().deactivateAccountandCloseConnection();
+                            } catch (ClientException ex) {
+                                logger.output("ClientException:"+ex.getMessage());
+                            }
+                        }
+                    }
+                    Answer a = new Answer("All client connections to server were closed.", this.commandtask.closeConnection.client);
+                    outgoingmessagechannel.offer(a);
             }
 
 
