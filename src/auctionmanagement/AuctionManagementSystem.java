@@ -6,21 +6,14 @@ package auctionmanagement;
  */
 import Event.*;
 import MyLogger.Log;
-/**
- * ********* RMI ******************************
- */
 import RMI.AnalyticsServerInterface;
 import RMI.BillingServerInterface;
 import RMI.BillingServerSecure;
 import RMI.RMIRegistry;
 import RMI.RMIRegistryException;
 import communication.Client;
-import communication.ClientSecure;
+import communication.ClientException;
 import java.rmi.RemoteException;
-
-/**
- * ********* RMI ******************************
- */
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -224,7 +217,6 @@ public class AuctionManagementSystem implements Runnable {
                         //rmiAnalyticsAvaible
                     }
 
-
                     if (rmiBillingAvailable) {
                         /*BillingServer RMI Method Invocation*/
                         logger.output("rmiBilling Aviable, billAuction to happen soon.", 2);
@@ -310,7 +302,6 @@ public class AuctionManagementSystem implements Runnable {
         public AMS_Handler(CommandTask commandtask) {
             this.commandtask = commandtask;
             logger.output("AMS_HandlerThread Created", 2);
-
         }
 
         public void run() {
@@ -549,8 +540,6 @@ public class AuctionManagementSystem implements Runnable {
                                 logger.output("AMS_HandlerThread:logout:RMI:NullPointerException"
                                         + ":" + e.getMessage(), 2);
                             }
-
-
                             /**
                              * ********* RMI ******************************
                              */
@@ -565,9 +554,6 @@ public class AuctionManagementSystem implements Runnable {
                 } catch (Exception e) {
                     logger.output("AMSHandlerThread:logout:Exception:" + e.getMessage());
                 }
-
-
-
             } else if (this.commandtask.create != null) {
                 try {
                     if (account_map.containsKey(commandtask.create.user)) {
@@ -598,33 +584,10 @@ public class AuctionManagementSystem implements Runnable {
                         } catch (RemoteException e) {
                             logger.output("AMS_HandlerThread:RMI:create:RemoteException"
                                     + ":" + e.getMessage(), 2);
-                            /*
-                             * BEGIN Stage4:startProcess()
-                             */
-
-                            /*TODO Stage4:ask marco, right place to start server outage? --> NO! 1. Implement "!closeConnections" First active connections
-                             *need to be closed, then closer ServerSocket (ServerSocketHandleThread) so no new AuctionTCPReadHandlers can be started
-                             * 2. Implement "!reactivateConnection" in AuctionClient which starts the ServerSocket again
-                             */
-                            startOutageProcess(); //ask marco if thats ok here at this point
-                            /*
-                             * END Stage4:startProcess()
-                             */
                         } catch (NullPointerException e) {
                             logger.output("AMS_HandlerThread:create:RMI:NullPointerException"
                                     + ":" + e.getMessage(), 2);
-                            /*
-                             * BEGIN Stage4:startProcess()
-                             */
-
-                            //TODO Stage4:ask marco, right place to start server outage? needs to be tested
-
-                            /*
-                             * END Stage4:startProcess()
-                             */
                         }
-
-
                         /**
                          * ********* RMI ******************************
                          */
@@ -635,9 +598,6 @@ public class AuctionManagementSystem implements Runnable {
                 } catch (Exception e) {
                     logger.output("AMSHandlerThread:create:Exception:" + e.getMessage());
                 }
-
-
-
             } else if (this.commandtask.bid != null) {
 
                 Auction auc = null;
@@ -846,26 +806,23 @@ public class AuctionManagementSystem implements Runnable {
                 outgoingmessagechannel.offer(a);
 
             } else if (this.commandtask.closeConnection != null) {
-                
-                //go through all active clients and close their connections
-                
+                    Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
+                    if (iterator.hasNext()) {
+                        while (iterator.hasNext()) {
+                            try {
+                                Map.Entry<String, Account> entry = iterator.next();
+                                entry.getValue().deactivateAccountandCloseConnection();
+                            } catch (ClientException ex) {
+                                logger.output("ClientException:"+ex.getMessage());
+                            }
+                        }
+                    }
+                    Answer a = new Answer("All client connections to server were closed.", this.commandtask.closeConnection.client);
+                    outgoingmessagechannel.offer(a);
             }
 
 
             logger.output("AMS_HandlerThread finished", 2);
-        }
-
-        /*
-         * Stage4:startProcess
-         * TODO Stage4:startOutageProcess method needs to be tested
-         */
-        private void startOutageProcess() {
-            /*
-             * 1. Select two random clients from client list
-             */
-            /*
-             * 2. Create two timestamps and use !getTimeStamp
-             */
         }
     }
 }

@@ -58,8 +58,6 @@ public class AuctionServer implements Runnable{
         }catch (Exception e) {
             throw (new AuctionServerException("Exception:"+e.getMessage()));
         }
-        
-        
        output.output("AuctionServer created..,", 2);
     }
     
@@ -75,9 +73,14 @@ public class AuctionServer implements Runnable{
                 while((line=input.readLine())!=null)
                 {
                     if(line.contains("!close")) {
-                        //TODO FIX!!
-                 //       CommandTask close = new CommandTask.CloseConnection();
-                 //       this.queue.offer(close);
+                        CommandTask.CloseConnection close = new CommandTask.CloseConnection();
+                        CommandTask closeConn = new CommandTask(close);
+                        this.queue.offer(closeConn);
+                        server.shutdown();
+                    } 
+                    
+                    if(line.contains("!reactivate")) {
+                        pool.execute(server);
                     }
                     //this.queue.offer(Commandtask); nur für !closeconnection
                     Thread.currentThread().interrupt();
@@ -98,6 +101,8 @@ public class AuctionServer implements Runnable{
                     break;
                   
                 }//while
+                } catch (ServerException ex) {
+                  this.output.output("AuctionServerThread:ServerException:"+ex.getMessage());
                 } catch (IOException e) {
                     this.output.output("AuctionServerThread:IOException:"+e.getMessage());
                 }
