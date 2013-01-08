@@ -21,6 +21,10 @@ public class Auction {
     private double highest_bid_amount=0.00;
     private String highest_bidder=null;
     
+    private boolean isgroupBid=false;
+    private String FirstConfirmfromUser=null;
+    private String SecondConfirmfromUser=null;
+    
     public Auction(String owner,long expires,String description)
     {
         
@@ -89,6 +93,16 @@ public class Auction {
     }
     
     public synchronized boolean setnewBid(String bidder,double bid)
+    {
+        if(this.highest_bid_amount>=bid)
+            return false;
+        this.highest_bid_amount=bid;
+        this.highest_bidder=bidder;
+        return true;
+    }
+    
+    public synchronized boolean setnewGroupBid(String bidder,String firstconfirm,
+            String secondconfirm,double bid)
     {
         if(this.highest_bid_amount>=bid)
             return false;
