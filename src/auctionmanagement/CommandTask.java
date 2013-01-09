@@ -18,7 +18,7 @@ public class CommandTask {
     Dummy dummy = null;
     ClientList clientList = null;
     CloseConnection closeConnection = null;
-    GroupBid groubid=null;
+    GroupBid groupbid=null;
     ConfirmBid confirmbid=null;
 
     public CommandTask(List list) {
@@ -27,8 +27,8 @@ public class CommandTask {
     }
     
     public CommandTask(GroupBid groupbid) {
-        this.groubid = groupbid;
-        StrRepr = new StringBuffer(this.groubid.toString());
+        this.groupbid = groupbid;
+        StrRepr = new StringBuffer(this.groupbid.toString());
     }
      public CommandTask(ConfirmBid confirmbid) {
         this.confirmbid = confirmbid;

@@ -788,8 +788,20 @@ public class AuctionManagementSystem implements Runnable {
                 } catch (Exception e) {
                     logger.output("AMSHandlerThread:bid:Exception:" + e.getMessage(), 2);
                 }
-
-            } else if (this.commandtask.end != null) {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                /*******************GROUP BID**********************************/
+            } else if (this.commandtask.groupbid != null) {
+                boolean b;
+                b=tentativeBids.insertnewTentativeBid(
+                        commandtask.groupbid.id,
+                        commandtask.groupbid.user,
+                        commandtask.groupbid.amount);
+//////////////////////////////////////////////////////////////////
+            }else if(this.commandtask.confirmbid!=null){
+                
+                
+                
+            }else if (this.commandtask.end != null) {
                 try {
                     String host = null;
                     int port = 0;

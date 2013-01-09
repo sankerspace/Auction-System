@@ -19,7 +19,7 @@ public class Auction {
     private long duration=0;//auctions ends in duration seconds
     private Date starttime=null;
     private double highest_bid_amount=0.00;
-    private String highest_bidder=null;
+    private String highest_bidder=null;//normal bidder or group bidder
     
     private boolean isgroupBid=false;
     private String FirstConfirmfromUser=null;
@@ -87,6 +87,11 @@ public class Auction {
         return this.owner;
     }
     
+    public boolean isGroupBid()
+    {
+       return  this.isgroupBid;
+    }
+    
     public synchronized long getNewAuctionID()
     {
       return Auction.counter++;  
@@ -101,15 +106,22 @@ public class Auction {
         return true;
     }
     
-    public synchronized boolean setnewGroupBid(String bidder,String firstconfirm,
+  
+    public synchronized boolean setnewGroupBid(String GroupBidder,String firstconfirm,
             String secondconfirm,double bid)
     {
         if(this.highest_bid_amount>=bid)
             return false;
         this.highest_bid_amount=bid;
-        this.highest_bidder=bidder;
+        this.highest_bidder=GroupBidder;
         return true;
     }
+    
+    public synchronized String getFirstConfirmUsername()
+    {
+       return null;  
+    }
+    
     public synchronized double getHighestBid()
     {
         return highest_bid_amount;
