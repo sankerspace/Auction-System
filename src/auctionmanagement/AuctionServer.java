@@ -86,16 +86,17 @@ public class AuctionServer implements Runnable{
                         server.shutdownServerThread();
                     } 
                     
-                    if(line.contains("!reactivate")) {
+                    if(line.contains("!reconnect")) {
                         server=new Server(TcpPort,serversocketHandle,pool,output);
                         pool.execute(server);
+                        output.out("Server restarted successfully.");
                     }
                     //this.queue.offer(Commandtask); nur für !closeconnection
                     if(line.contains("!end")) {
                        Thread.currentThread().interrupt();
                        break;
                     }
- 
+                output.out("\n:");
                 }//while
             } catch (ServerException e) {
                this.output.output("AuctionServerThread:ServerException:"+e.getMessage());

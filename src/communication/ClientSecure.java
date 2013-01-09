@@ -44,7 +44,6 @@ public class ClientSecure extends Client {
     
     public ClientSecure(Client client) 
     {
-         
         super(client);
         if(!client.getClientType().contains("clientsecure"))
         {
@@ -62,8 +61,8 @@ public class ClientSecure extends Client {
              this.ClientKeyDirectory=cl.ClientKeyDirectory;
         }
         this.type="clientsecure";
-        
     }
+    
     protected void setClientKeyDirectory(String ClientKeyDirectory)
     {
         this.ClientKeyDirectory=ClientKeyDirectory;
@@ -107,5 +106,24 @@ public class ClientSecure extends Client {
         this.user=null;
         this.userinfo=null;
     
+    }
+    
+    public void copyFromClient(Client client) {
+        if(!client.getClientType().contains("clientsecure"))
+        {
+        this.cypher=null;
+        this.user=null;
+        this.userinfo=null;
+        this.mode=false;
+        } else
+        {
+            ClientSecure cl = (ClientSecure)client;
+            this.cypher=cl.cypher;
+            this.mode=cl.mode;
+            this.user=cl.user;
+            this.userinfo=cl.userinfo;
+             this.ClientKeyDirectory=cl.ClientKeyDirectory;
+        }
+        this.type="clientsecure";
     }
 }
