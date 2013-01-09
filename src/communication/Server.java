@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import MyLogger.Log;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -68,10 +70,16 @@ public class Server implements Runnable{
         }
     
     }
-    
-    public void shutdownServerThread(Thread t)
+   
+    public void shutdownServerThread()
     {
-        t.interrupt();
+        try {
+            Thread.currentThread().interrupt();
+            if(!serversocket.isClosed())
+                serversocket.close();
+        } catch (IOException ex) {
+            
+        }
     }
     
     
@@ -91,7 +99,7 @@ public class Server implements Runnable{
                 this.handler.setClient(serversocket.accept());
                 pool.execute(this.handler);
             }catch(IOException e)
-            {
+            {   Thread.currentThread().interrupt();
                 this.errorlog.output("Server error:"+e.getMessage());
             }catch(ServerException e)
             {
@@ -100,12 +108,15 @@ public class Server implements Runnable{
             }
          
          }
+         /*
         try {
             this.shutdown();
+            errorlog.output("SocketServer is closed.");
         } catch (ServerException e) {
             this.errorlog.output("Server error:"+e.getMessage());
+            errorlog.output("SocketServer is closed.");
         }
-         
+         */
       
     }    
     //A user defined Handler must inherit this class and must

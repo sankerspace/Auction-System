@@ -104,7 +104,8 @@ public class Account {
     public void deactivateAccountandCloseConnection() throws ClientException
     {
         try {
-            this.TCPClient.closeSocket();
+            if(this.TCPClient!=null)
+                this.TCPClient.closeSocket();
         } catch (ClientException ex) {
            throw new ClientException(ex.getMessage());
         }finally{

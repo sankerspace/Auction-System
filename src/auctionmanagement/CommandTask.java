@@ -264,7 +264,6 @@ public class CommandTask {
 
     public static class CloseConnection {
 
-        Client client = null;
         StringBuffer StrRepr = null;
 
         public CloseConnection() {

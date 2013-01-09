@@ -870,8 +870,7 @@ public class AuctionManagementSystem implements Runnable {
                             }
                         }
                     }
-                    Answer a = new Answer("All client connections to server were closed.", this.commandtask.closeConnection.client);
-                    outgoingmessagechannel.offer(a);
+                    logger.output("All active connections to clients are closed.");
             }
 
 

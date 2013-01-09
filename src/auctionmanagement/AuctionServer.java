@@ -12,6 +12,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import security.RSAAuthenticationException;
 
 /**
@@ -21,9 +23,13 @@ import security.RSAAuthenticationException;
 public class AuctionServer implements Runnable{
     private AuctionManagementSystem ams=null;
     private Server server=null;
+    Server.Handler serversocketHandle=null;
     private final ExecutorService pool;
     private LinkedBlockingQueue<CommandTask> queue=null;//communication to AMS
     private Log output=null;
+    private OperationSecure operationsecureInitializedProfil=null;
+    private int TcpPort=0;
+    
     //Alle Server.Handler schreiben auf die queue, nur das ActionmanagementSystem darf
     //von der queue lesen [blockierend]
     
@@ -34,7 +40,8 @@ public class AuctionServer implements Runnable{
     {
         try {
            this.output=output;
-           OperationSecure op=new OperationSecure(
+           this.TcpPort=tcpPort;
+           operationsecureInitializedProfil=new OperationSecure(
                    ServerPrivateKeyFilename,
                    ServerKeyDirectoryname,
                    ClientKeyDirectoryname);
@@ -43,8 +50,8 @@ public class AuctionServer implements Runnable{
            pool = Executors.newCachedThreadPool();
            ams= new AuctionManagementSystem(analytic, billing, queue,pool,output);
            output.output("AuctionServer Port:"+tcpPort+"", 3);
-           Server.Handler serversocketHandle=new ServerSocketHandleThread(queue,
-                   pool,op,output);
+           serversocketHandle=new ServerSocketHandleThread(queue,
+                   pool,operationsecureInitializedProfil,output);
            pool.execute(ams);
         
            server=new Server(tcpPort,serversocketHandle,pool,output);
@@ -76,10 +83,11 @@ public class AuctionServer implements Runnable{
                         CommandTask.CloseConnection close = new CommandTask.CloseConnection();
                         CommandTask closeConn = new CommandTask(close);
                         this.queue.offer(closeConn);
-                        server.shutdown();
+                        server.shutdownServerThread();
                     } 
                     
                     if(line.contains("!reactivate")) {
+                        server=new Server(TcpPort,serversocketHandle,pool,output);
                         pool.execute(server);
                     }
                     //this.queue.offer(Commandtask); nur für !closeconnection
@@ -89,9 +97,9 @@ public class AuctionServer implements Runnable{
                     }
  
                 }//while
-                } catch (ServerException ex) {
-                  this.output.output("AuctionServerThread:ServerException:"+ex.getMessage());
-                } catch (IOException e) {
+            } catch (ServerException e) {
+               this.output.output("AuctionServerThread:ServerException:"+e.getMessage());
+            } catch (IOException e) {
                     this.output.output("AuctionServerThread:IOException:"+e.getMessage());
                 }
            
