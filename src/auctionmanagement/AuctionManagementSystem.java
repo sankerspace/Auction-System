@@ -399,9 +399,9 @@ public class AuctionManagementSystem implements Runnable {
                             Client client_ = entry.getValue().getClient();
                             if (entry.getValue().isOnline() && !this.commandtask.clientList.name.equals(entry.getValue().getName())) {
                                 clientList.append(
-                                        client_.getDestinationHost()
+                                        entry.getValue().getHost()
                                         + ":"
-                                        + client_.getDestinationPort()
+                                        + entry.getValue().getUdpPort()
                                         + " - "
                                         + entry.getValue().getName()
                                         + "\n");
