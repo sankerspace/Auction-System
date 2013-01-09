@@ -85,6 +85,20 @@ public class AuctionTCPReadHandler implements Runnable{
                        r.getUserName(),r.getParameter().bidId,r.getParameter().bidValue);
                c= new CommandTask(l);
             
+            }else if(command.contains("groupbid"))
+            {
+                
+               CommandTask.Bid l = new CommandTask.Bid(r.getClient(),
+                       r.getUserName(),r.getParameter().bidId,r.getParameter().bidValue);
+               c= new CommandTask(l);
+            
+            }else if(command.contains("confirmbid"))
+            {
+                
+               CommandTask.Bid l = new CommandTask.Bid(r.getClient(),
+                       r.getUserName(),r.getParameter().bidId,r.getParameter().bidValue);
+               c= new CommandTask(l);
+            
             }
             else if(command.contains("!getClientList"))
             {

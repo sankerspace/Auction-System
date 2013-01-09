@@ -18,18 +18,22 @@ public class CommandTask {
     Dummy dummy = null;
     ClientList clientList = null;
     CloseConnection closeConnection = null;
-    ListDummy listdummy=null;
+    GroupBid groubid=null;
+    ConfirmBid confirmbid=null;
 
     public CommandTask(List list) {
         this.list = list;
         StrRepr = new StringBuffer(this.list.toString());
     }
     
-    public CommandTask(ListDummy listdummy) {
-        this.listdummy = listdummy;
-        StrRepr = new StringBuffer(this.listdummy.toString());
+    public CommandTask(GroupBid groupbid) {
+        this.groubid = groupbid;
+        StrRepr = new StringBuffer(this.groubid.toString());
     }
-
+     public CommandTask(ConfirmBid confirmbid) {
+        this.confirmbid = confirmbid;
+        StrRepr = new StringBuffer(this.confirmbid.toString());
+    }
     public CommandTask(ClientList clientList) {
         this.clientList = clientList;
         StrRepr = new StringBuffer(this.clientList.toString());
@@ -208,6 +212,59 @@ public class CommandTask {
         }
     }
 
+    public static class GroupBid {
+
+        StringBuffer StrRepr = null;
+        Client client = null;
+        String user = null;
+        int id;
+        double amount;
+
+        public GroupBid(Client client, String user, int id, double amount) {
+            this.client = client;
+            this.amount = amount;
+            this.id = id;
+            this.user = user;
+
+            StrRepr = new StringBuffer("GroupBid:client:host" + this.client.getDestinationHost()
+                    + "\n" + "GroupBid:client:port:" + this.client.getDestinationPort());
+            StrRepr.append("\n" + "GroupBid:user;" + this.user);
+            StrRepr.append("\n" + "GroupBid:id:" + this.id);
+            StrRepr.append("\n" + "GroupBid:amount:" + this.amount);
+        }
+
+        public String toString() {
+            return StrRepr.toString();
+        }
+    }
+
+    public static class ConfirmBid {
+
+        StringBuffer StrRepr = null;
+        Client client = null;
+        String user = null;
+        int id;
+        double amount;
+
+        public ConfirmBid(Client client, String user, int id, double amount) {
+            this.client = client;
+            this.amount = amount;
+            this.id = id;
+            this.user = user;
+
+            StrRepr = new StringBuffer("ConfirmBid:client:host" + this.client.getDestinationHost()
+                    + "\n" + "ConfirmBid:client:port:" + this.client.getDestinationPort());
+            StrRepr.append("\n" + "ConfirmBid:user;" + this.user);
+            StrRepr.append("\n" + "ConfirmBid:id:" + this.id);
+            StrRepr.append("\n" + "ConfirmBid:amount:" + this.amount);
+        }
+
+        public String toString() {
+            return StrRepr.toString();
+        }
+    }
+
+    
     public static class End {
 
         Client client = null;
@@ -244,24 +301,7 @@ public class CommandTask {
         }
     }
     
-    public static class ListDummy {
-
-        Client client = null;
-        StringBuffer StrRepr = null;
-
-        public ListDummy(Client client) {
-            this.client = client;
-
-            StrRepr = new StringBuffer("ListDummy:client:host" + this.client.getDestinationHost()
-                    + "\n" + "ListDummy:client:port:" + this.client.getDestinationPort());
-
-        }
-
-        public String toString() {
-            return StrRepr.toString();
-        }
-    }
-
+    
     public static class CloseConnection {
 
         StringBuffer StrRepr = null;

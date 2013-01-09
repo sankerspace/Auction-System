@@ -35,6 +35,7 @@ public class AuctionManagementSystem implements Runnable {
     private AuctionUDPMessageServer NotificationServer = null;
     private LinkedBlockingQueue<Notification> notificationchannel = null;
     private final ExecutorService pool;
+    private TentativeBids tentativeBids=null;
     private ReentrantLock lockForOnlineUser=null; 
     private ReentrantLock lockForBlockedUser=null; 
     private int onlineUser=0;
@@ -71,13 +72,14 @@ public class AuctionManagementSystem implements Runnable {
         this.incomingrequest = incomingrequest;
         this.account_map = new ConcurrentHashMap<String, Account>();
         this.auction_map = new ConcurrentHashMap<Long, Auction>();
-        this.timer = new Timer(true);
+        this.timer = new Timer(true); 
         this.notificationchannel = new LinkedBlockingQueue<Notification>();
         //this.NotificationServer = new AuctionUDPMessageServer(notificationchannel,this.logger);
         this.outgoingmessagechannel = new LinkedBlockingQueue<Answer>();
         this.outgoingMessageServer = new AuctionTCPMessageServer(outgoingmessagechannel, this.logger);
         lockForOnlineUser=new ReentrantLock(); 
         lockForBlockedUser=new ReentrantLock(); 
+        tentativeBids=new TentativeBids();
         //this.pool.execute(NotificationServer);
         this.pool.execute(outgoingMessageServer);
         this.logger.output("AuctionManagementSystem created...", 2);
@@ -425,6 +427,7 @@ public class AuctionManagementSystem implements Runnable {
                                         + " " + commandtask.login.user + "!");
                                 Answer a = new Answer(answer, commandtask.login.client);
                                 outgoingmessagechannel.offer(a);
+                                addOnlineUser();
                                 logger.output("AMSHandlerThread:login finished:"
                                         + "user " + commandtask.login.user, 3);
 
@@ -494,6 +497,7 @@ public class AuctionManagementSystem implements Runnable {
                                     + " " + commandtask.login.user + "!");
                             Answer a = new Answer(answer, acc.getClient());
                             outgoingmessagechannel.offer(a);
+                            addOnlineUser();
                             logger.output("AMSHandlerThread:login finished:"
                                     + "user " + commandtask.login.client, 3);
                             /**
@@ -566,6 +570,7 @@ public class AuctionManagementSystem implements Runnable {
                                     + " " + commandtask.logout.user + "!");
                             Answer a = new Answer(answer, commandtask.logout.client);
                             outgoingmessagechannel.offer(a);
+                            deleteOnlineUser();
 
                             /**
                              * ********* RMI ******************************
