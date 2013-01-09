@@ -22,6 +22,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class AuctionManagementSystem implements Runnable {
 
@@ -34,6 +35,10 @@ public class AuctionManagementSystem implements Runnable {
     private AuctionUDPMessageServer NotificationServer = null;
     private LinkedBlockingQueue<Notification> notificationchannel = null;
     private final ExecutorService pool;
+    private ReentrantLock lockForOnlineUser=null; 
+    private ReentrantLock lockForBlockedUser=null; 
+    private int onlineUser=0;
+    private int blockedUser=0;
     private Log logger = null;
     /**
      * ********* RMI ******************************
@@ -71,7 +76,8 @@ public class AuctionManagementSystem implements Runnable {
         //this.NotificationServer = new AuctionUDPMessageServer(notificationchannel,this.logger);
         this.outgoingmessagechannel = new LinkedBlockingQueue<Answer>();
         this.outgoingMessageServer = new AuctionTCPMessageServer(outgoingmessagechannel, this.logger);
-
+        lockForOnlineUser=new ReentrantLock(); 
+        lockForBlockedUser=new ReentrantLock(); 
         //this.pool.execute(NotificationServer);
         this.pool.execute(outgoingMessageServer);
         this.logger.output("AuctionManagementSystem created...", 2);
@@ -155,7 +161,53 @@ public class AuctionManagementSystem implements Runnable {
         timer.cancel();
         this.logger.output("AuctionManagementSystem closed...", 2);
     }
-
+    protected void addOnlineUser()
+    {
+        this.lockForOnlineUser.lock();
+        this.onlineUser++;
+        this.lockForOnlineUser.unlock();  
+    }
+    protected void deleteOnlineUser()
+    {
+        this.lockForOnlineUser.lock();
+        if(onlineUser>0)
+            this.onlineUser--;
+        this.lockForOnlineUser.unlock(); 
+    }
+    protected int getNumberofOnlineUser()
+    {
+        this.lockForOnlineUser.lock();
+        int a=this.onlineUser;
+        this.lockForOnlineUser.unlock();
+        return a;
+    }
+    
+    protected void addBlockedUser()
+    {
+        this.lockForBlockedUser.lock();
+        this.blockedUser++;
+        this.lockForBlockedUser.unlock();  
+    }
+    protected void deleteBlockedUser()
+    {
+        this.lockForBlockedUser.lock();
+        if(blockedUser>0)
+            this.blockedUser--;
+        this.lockForBlockedUser.unlock(); 
+    }
+    protected int getNumberofBlockedUser()
+    {
+        this.lockForBlockedUser.lock();
+        int a=this.blockedUser;
+        this.lockForBlockedUser.unlock(); 
+        return a;
+    }
+    
+    
+    
+    
+    
+    
     public class Task extends TimerTask {
 
         private Long auction_id;
@@ -826,4 +878,7 @@ public class AuctionManagementSystem implements Runnable {
             logger.output("AMS_HandlerThread finished", 2);
         }
     }
+    
+    
+    
 }

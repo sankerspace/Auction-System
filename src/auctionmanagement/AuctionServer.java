@@ -83,23 +83,11 @@ public class AuctionServer implements Runnable{
                         pool.execute(server);
                     }
                     //this.queue.offer(Commandtask); nur für !closeconnection
-                    Thread.currentThread().interrupt();
-                    //server.shutdown();
-                    //nach paar sekunden
-                    /*
-                    Server.Handler serversocketHandle=new ServerSocketHandleThread(queue,
-                        pool,ServerPrivateKeyFilename,
-                        ClientKeyDirectoryname,ServerKeyDirectoryname,output);
-      
-                    try {
-                        server=new Server(tcpPort,serversocketHandle,pool,output);
-                        pool.execute(server);
-                    } catch (ServerException e) {
-                        throw (new AuctionServerException("ServerException:"+e.getMessage()));
-                    }* */
-                                
-                    break;
-                  
+                    if(line.contains("!end")) {
+                       Thread.currentThread().interrupt();
+                       break;
+                    }
+ 
                 }//while
                 } catch (ServerException ex) {
                   this.output.output("AuctionServerThread:ServerException:"+ex.getMessage());
