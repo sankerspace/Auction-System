@@ -191,22 +191,47 @@ public class CommandTask {
         StringBuffer StrRepr = null;
         Client client = null;
         String user = null;
+        String firstconfirmer=null;
+        String secondconfirmer=null;
         int id;
         double amount;
+        boolean isGroupBid;
 
         public Bid(Client client, String user, int id, double amount) {
             this.client = client;
             this.amount = amount;
             this.id = id;
             this.user = user;
+            this.isGroupBid=false;
 
             StrRepr = new StringBuffer("Bid:client:host" + this.client.getDestinationHost()
                     + "\n" + "Bid:client:port:" + this.client.getDestinationPort());
+            StrRepr.append("\n" + "Bid:NormalBid:");
+            StrRepr.append("\n" + "Bid:user:" + this.user);
+            StrRepr.append("\n" + "Bid:id:" + this.id);
+            StrRepr.append("\n" + "Bid:amount:" + this.amount);
+        }
+        
+         public Bid(Client client, String user,String firstconfirm,String secondconfirm, int id, double amount) {
+            this.client = client;
+            this.amount = amount;
+            this.id = id;
+            this.user = user ;
+            this.isGroupBid=true;
+            this.firstconfirmer=firstconfirm;
+            this.secondconfirmer=secondconfirm;
+            
+            StrRepr = new StringBuffer("Bid:client:host" + this.client.getDestinationHost()
+                    + "\n" + "Bid:client:port:" + this.client.getDestinationPort());
+            StrRepr.append("\n" + "Bid:GroupBid:" + this.user);
             StrRepr.append("\n" + "Bid:user;" + this.user);
+            StrRepr.append("\n" + "Bid:FistConfirmer;" + this.firstconfirmer);
+             StrRepr.append("\n" + "Bid:SecondConfirmer;" + this.secondconfirmer);
             StrRepr.append("\n" + "Bid:id:" + this.id);
             StrRepr.append("\n" + "Bid:amount:" + this.amount);
         }
 
+        
         public String toString() {
             return StrRepr.toString();
         }
