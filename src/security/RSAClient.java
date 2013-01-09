@@ -55,10 +55,14 @@ public class RSAClient extends RSAAuthentication{
 
             String path = this.ServerKeydirectory.getPath()+File.separator+servername+".pub.pem";
             File publicServerKeyFile = new File(path);
+             if(!publicServerKeyFile.isFile())
+                 throw new RSAAuthenticationException("Wrong Server Name.");
             publicKeyServer=this.getPublicKey(publicServerKeyFile.getPath());
             
             String path_second=this.ClientKeydirectory.getPath()+File.separator+user+".pem";
              File privateClientKeyFile = new File(path_second);
+             if(!privateClientKeyFile.isFile())
+                 throw new RSAAuthenticationException("Wrong User Name.");
             privateKeyClient=this.getPrivateKey(privateClientKeyFile.getPath());
 
 
@@ -245,24 +249,14 @@ public class RSAClient extends RSAAuthentication{
             w.writeUTF(send);
             
         } catch (RSAAuthenticationException ex) {
-            try {
-                w.writeUTF(error);
-            } catch (IOException ex1) {  }
+            
            throw new RSAAuthenticationException(ex.getMessage());
+           
         }catch (IOException ex) {
-            try {
-                w.writeUTF(error);
-            } catch (IOException ex1) {
-              
-            }
+            
            throw new RSAAuthenticationException("IOException:"+ex.getMessage());
         }catch(Exception ex)
         {
-            try {
-                w.writeUTF(error);
-            } catch (IOException ex1) {
-               
-            }
             throw new RSAAuthenticationException("Exception:"+ex.getMessage());
         }
          

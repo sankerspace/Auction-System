@@ -64,12 +64,11 @@ public class OperationSecurewithHmac implements Operation{
   public String readString() throws OperationException {
         String s = null;
         StringBuffer decrypted=new StringBuffer("");
-        boolean integritystate;
         DataInputStream r = null;
         try {
             r = new DataInputStream(in);
             s = r.readUTF();
-            integritystate =this.aeswithhmac.validateMessage(s,decrypted);
+            this.lastVerification =this.aeswithhmac.validateMessage(s,decrypted);
             return decrypted.toString();
 
         } catch (AESwithHMACException e) {
@@ -107,6 +106,11 @@ public class OperationSecurewithHmac implements Operation{
   public String getUserName() {
       return this.user;
    }
+  
+  public boolean getLastVerificationStatus()
+  {
+      return this.lastVerification;
+  }
 }
 
 

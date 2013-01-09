@@ -309,6 +309,7 @@ public class AuctionManagementSystem implements Runnable {
             if (this.commandtask.list != null) {
                 try {
                     StringBuffer list = new StringBuffer();
+                    list.append("list%");
                     Iterator<Map.Entry<Long, Auction>> iterator = auction_map.entrySet().iterator();
                     if (iterator.hasNext()) {//if no auction entry avaible, no sending
                         while (iterator.hasNext()) {

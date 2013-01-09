@@ -43,7 +43,7 @@ public class AuctionClient {
     private ClientStatus userstatus = null;
     private Operation operation=null;
     private String clientList = null; //Stage4:List of clients, filled by !getClientList command
-    private ReentrantLock lock; //for synced communication between AuctionClient and AuctionTCPHandler
+    private ReentrantLock lockForSendingSocket=null; //for synced communication between AuctionClient and AuctionTCPHandler
     
 
     public AuctionClient(String host, int tcpPort, int udpPort,
@@ -56,6 +56,7 @@ public class AuctionClient {
         this.ServerPublicKeyFilename=ServerPublicKeyFilename;
         this.ClientKeyDirectoryname=ClientKeyDirectoryname;
         this.ServerKeyDirectoryname=ServerKeyDirectoryname;
+        lockForSendingSocket=new ReentrantLock();
         try {
 
             //this.handleUDP=new AuctionClientUDPHandler(output);
@@ -72,10 +73,7 @@ public class AuctionClient {
         } catch (OperationException e) {
             
             //Stage4:If server not reachable, startOutageProcess()
-            
-            
-            
-            
+
             throw (new AuctionClientException(":OperationException:",e));
 
         } catch (ClientException e) {
@@ -154,8 +152,9 @@ public class AuctionClient {
                             break;
                         } else if (req.getCommandName().contains("!login")) {
                             this.isLoginTry=true;
+                            lockForSendingSocket.lock();
                             operation.writeString("!dummy");
-                           
+                            lockForSendingSocket.unlock();
                             String user=req.getUserName();
                             operation = new OperationSecure(clientTCP,
                                     user,
@@ -182,7 +181,9 @@ public class AuctionClient {
                             throw (new RequestException("You must be logged out!" + "\n"
                                     + this.userstatus.getUser() + ">"));
                         } else if (req.getCommandName().contains("!logout")) {
+                            lockForSendingSocket.lock();
                             operation.writeString("!dummy");
+                            lockForSendingSocket.unlock();
                             this.userstatus.resetUser();
                         } else if (req.getCommandName().contains("!login")) {
                             throw (new RequestException("You must log out!" + "\n"
@@ -194,7 +195,9 @@ public class AuctionClient {
                         msg = req.createRequestStringforServer();
                         this.errorlog.output("createRequestStringforServer():" + msg, 3);
                         if (msg != null) {
+                            lockForSendingSocket.lock();
                             operation.writeString(msg);
+                            lockForSendingSocket.unlock();
                         } else {
                             throw (new RequestException("Cannot generate message!"));
                         }
@@ -207,8 +210,14 @@ public class AuctionClient {
                 }catch (RSAAuthenticationException e) {
                     this.errorlog.output("Error:Authentication failed");
                     this.errorlog.output(e.getMessage(), 2);
+                    
 
+                }finally{
+                    isLoginTry=false;
+                    if(lockForSendingSocket.isHeldByCurrentThread())
+                        lockForSendingSocket.unlock();
                 }
+                
                 if (userstatus.noUser()) {
                     errorlog.output(">");
                 } else {
@@ -291,6 +300,7 @@ public class AuctionClient {
         boolean switchToSecureChannel=false;
         OperationSecurewithHmac opSecurewithHmac=null;
         OperationTCP op=null;
+        boolean isSecondAttemptforListCommand=false;
         
         public AuctionClientTCPHandler(Client client,Log out) throws OperationException
         {
@@ -310,8 +320,7 @@ public class AuctionClient {
                 
                 try {
                     if(!switchToSecureChannel)
-                    {
-                       
+                    {/*UNSECURE communication*/
                         msg = op.readString();
                         if(msg.contains("!denied"))
                         {   
@@ -328,17 +337,40 @@ public class AuctionClient {
                         } else if(msg.contains("Active Clients:")) {
                             clientList = msg;
                             out.output(msg);
-                        } else
+                        }else if(msg.contains("list"))
+                        {
+                          msg=(msg.split("%"))[1];
+                          out.output(msg);
+                        }else
                             out.output(msg);
+                        
                     } else {
-                       
+                       /*SECURE communication*/
                         msg = opSecurewithHmac.readString();
                         if(msg.contains("!dummy"))
                         {
                             this.setRegularChannel();
                             this.opSecurewithHmac=null;
-                        }else
+                        }else if(msg.contains("list"))
                         {
+                          String[] s=msg.split("%");
+                          if(!this.opSecurewithHmac.getLastVerificationStatus())
+                          {
+                               out.output("Error:Message Integrity of the last received message was corrupted.");  
+                              if(!isSecondAttemptforListCommand)
+                              {
+                                  isSecondAttemptforListCommand=true;
+                                  lockForSendingSocket.lock();
+                                  op.writeString("!list");
+                                  lockForSendingSocket.unlock();
+                                  
+                              }
+                              
+                          }
+                          out.output(s[1]);  
+                        }else
+                        {   
+                            isSecondAttemptforListCommand=false;
                             out.output(msg);
                         }
                     }
@@ -351,6 +383,9 @@ public class AuctionClient {
                     out.output("AuctionClientTCPHandlerThread:Exception"+ex.getMessage());
                     Thread.currentThread().interrupt();
 
+                }finally{
+                    if(lockForSendingSocket.isHeldByCurrentThread())
+                        lockForSendingSocket.unlock();
                 }
             }
             out.output("AuctionClientTCPHandlerThread finished..", 2);
