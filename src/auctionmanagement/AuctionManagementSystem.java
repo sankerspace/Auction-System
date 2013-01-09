@@ -35,11 +35,11 @@ public class AuctionManagementSystem implements Runnable {
     private AuctionUDPMessageServer NotificationServer = null;
     private LinkedBlockingQueue<Notification> notificationchannel = null;
     private final ExecutorService pool;
-    private TentativeBids tentativeBids=null;
-    private ReentrantLock lockForOnlineUser=null; 
-    private ReentrantLock lockForBlockedUser=null; 
-    private int onlineUser=0;
-    private int blockedUser=0;
+    private TentativeBids tentativeBids = null;
+    private ReentrantLock lockForOnlineUser = null;
+    private ReentrantLock lockForBlockedUser = null;
+    private int onlineUser = 0;
+    private int blockedUser = 0;
     private Log logger = null;
     /**
      * ********* RMI ******************************
@@ -72,14 +72,14 @@ public class AuctionManagementSystem implements Runnable {
         this.incomingrequest = incomingrequest;
         this.account_map = new ConcurrentHashMap<String, Account>();
         this.auction_map = new ConcurrentHashMap<Long, Auction>();
-        this.timer = new Timer(true); 
+        this.timer = new Timer(true);
         this.notificationchannel = new LinkedBlockingQueue<Notification>();
         //this.NotificationServer = new AuctionUDPMessageServer(notificationchannel,this.logger);
         this.outgoingmessagechannel = new LinkedBlockingQueue<Answer>();
         this.outgoingMessageServer = new AuctionTCPMessageServer(outgoingmessagechannel, this.logger);
-        lockForOnlineUser=new ReentrantLock(); 
-        lockForBlockedUser=new ReentrantLock(); 
-        tentativeBids=new TentativeBids();
+        lockForOnlineUser = new ReentrantLock();
+        lockForBlockedUser = new ReentrantLock();
+        tentativeBids = new TentativeBids();
         //this.pool.execute(NotificationServer);
         this.pool.execute(outgoingMessageServer);
         this.logger.output("AuctionManagementSystem created...", 2);
@@ -132,7 +132,7 @@ public class AuctionManagementSystem implements Runnable {
          */
 
     }
-    //returns true if the queue had enogh space 
+    //returns true if the queue had enough space 
 
     @Override
     public void run() {
@@ -163,53 +163,49 @@ public class AuctionManagementSystem implements Runnable {
         timer.cancel();
         this.logger.output("AuctionManagementSystem closed...", 2);
     }
-    protected void addOnlineUser()
-    {
+
+    protected void addOnlineUser() {
         this.lockForOnlineUser.lock();
         this.onlineUser++;
-        this.lockForOnlineUser.unlock();  
+        this.lockForOnlineUser.unlock();
     }
-    protected void deleteOnlineUser()
-    {
+
+    protected void deleteOnlineUser() {
         this.lockForOnlineUser.lock();
-        if(onlineUser>0)
+        if (onlineUser > 0) {
             this.onlineUser--;
-        this.lockForOnlineUser.unlock(); 
+        }
+        this.lockForOnlineUser.unlock();
     }
-    protected int getNumberofOnlineUser()
-    {
+
+    protected int getNumberofOnlineUser() {
         this.lockForOnlineUser.lock();
-        int a=this.onlineUser;
+        int a = this.onlineUser;
         this.lockForOnlineUser.unlock();
         return a;
     }
-    
-    protected void addBlockedUser()
-    {
+
+    protected void addBlockedUser() {
         this.lockForBlockedUser.lock();
         this.blockedUser++;
-        this.lockForBlockedUser.unlock();  
+        this.lockForBlockedUser.unlock();
     }
-    protected void deleteBlockedUser()
-    {
+
+    protected void deleteBlockedUser() {
         this.lockForBlockedUser.lock();
-        if(blockedUser>0)
+        if (blockedUser > 0) {
             this.blockedUser--;
-        this.lockForBlockedUser.unlock(); 
+        }
+        this.lockForBlockedUser.unlock();
     }
-    protected int getNumberofBlockedUser()
-    {
+
+    protected int getNumberofBlockedUser() {
         this.lockForBlockedUser.lock();
-        int a=this.blockedUser;
-        this.lockForBlockedUser.unlock(); 
+        int a = this.blockedUser;
+        this.lockForBlockedUser.unlock();
         return a;
     }
-    
-    
-    
-    
-    
-    
+
     public class Task extends TimerTask {
 
         private Long auction_id;
@@ -368,16 +364,29 @@ public class AuctionManagementSystem implements Runnable {
                     if (iterator.hasNext()) {//if no auction entry avaible, no sending
                         while (iterator.hasNext()) {
                             Map.Entry<Long, Auction> entry = iterator.next();
-                            list.append(entry.getKey().toString() + "." + " '"
-                                    + entry.getValue().getDescription() + "' "
-                                    + entry.getValue().getOwner() + " "
-                                    + entry.getValue().getEndDate() + " "
-                                    + Double.toString(entry.getValue().getHighestBid()) + " "
-                                    + entry.getValue().getHighestBidder() + "\n");
+                            if (entry.getValue().isGroupBid()) {
+                                list.append(entry.getKey().toString() + "." + " '"
+                                        + entry.getValue().getDescription() + "' "
+                                        + entry.getValue().getOwner() + " "
+                                        + entry.getValue().getEndDate() + " "
+                                        + Double.toString(entry.getValue().getHighestBid()) + " "
+                                        + entry.getValue().getHighestBidder() + " "
+                                        + entry.getValue().isGroupBid() + " ("
+                                        + entry.getValue().getFirstConfirmUsername() + " "
+                                        + entry.getValue().getSecondConfirmUsername() + ")"
+                                        + "\n");
+                            } else {
+                                list.append(entry.getKey().toString() + "." + " '"
+                                        + entry.getValue().getDescription() + "' "
+                                        + entry.getValue().getOwner() + " "
+                                        + entry.getValue().getEndDate() + " "
+                                        + Double.toString(entry.getValue().getHighestBid()) + " "
+                                        + entry.getValue().getHighestBidder() + " "
+                                        + entry.getValue().isGroupBid()
+                                        + "\n");
+                            }
                         }
-
                         list.setCharAt(list.length() - 1, ' ');
-
                     }
                     Answer a = new Answer(list.toString(), this.commandtask.list.client);
                     outgoingmessagechannel.offer(a);
@@ -789,19 +798,18 @@ public class AuctionManagementSystem implements Runnable {
                     logger.output("AMSHandlerThread:bid:Exception:" + e.getMessage(), 2);
                 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                /*******************GROUP BID**********************************/
+                /**
+                 * *****************GROUP BID*********************************
+                 */
             } else if (this.commandtask.groupbid != null) {
                 boolean b;
-                b=tentativeBids.insertnewTentativeBid(
+                b = tentativeBids.insertnewTentativeBid(
                         commandtask.groupbid.id,
                         commandtask.groupbid.user,
                         commandtask.groupbid.amount);
 //////////////////////////////////////////////////////////////////
-            }else if(this.commandtask.confirmbid!=null){
-                
-                
-                
-            }else if (this.commandtask.end != null) {
+            } else if (this.commandtask.confirmbid != null) {
+            } else if (this.commandtask.end != null) {
                 try {
                     String host = null;
                     int port = 0;
@@ -876,25 +884,22 @@ public class AuctionManagementSystem implements Runnable {
                 outgoingmessagechannel.offer(a);
 
             } else if (this.commandtask.closeConnection != null) {
-                    Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
-                    if (iterator.hasNext()) {
-                        while (iterator.hasNext()) {
-                            try {
-                                Map.Entry<String, Account> entry = iterator.next();
-                                entry.getValue().deactivateAccountandCloseConnection();
-                            } catch (ClientException ex) {
-                                logger.output("ClientException:"+ex.getMessage());
-                            }
+                Iterator<Map.Entry<String, Account>> iterator = account_map.entrySet().iterator();
+                if (iterator.hasNext()) {
+                    while (iterator.hasNext()) {
+                        try {
+                            Map.Entry<String, Account> entry = iterator.next();
+                            entry.getValue().deactivateAccountandCloseConnection();
+                        } catch (ClientException ex) {
+                            logger.output("ClientException:" + ex.getMessage());
                         }
                     }
-                    logger.output("All active connections to clients are closed.");
+                }
+                logger.output("All active connections to clients are closed.");
             }
 
 
             logger.output("AMS_HandlerThread finished", 2);
         }
     }
-    
-    
-    
 }
