@@ -364,26 +364,19 @@ public class AuctionManagementSystem implements Runnable {
                     if (iterator.hasNext()) {//if no auction entry avaible, no sending
                         while (iterator.hasNext()) {
                             Map.Entry<Long, Auction> entry = iterator.next();
-                            if (entry.getValue().isGroupBid()) {
-                                list.append(entry.getKey().toString() + "." + " '"
+                            list.append(entry.getKey().toString() + "." + " '"
                                         + entry.getValue().getDescription() + "' "
                                         + entry.getValue().getOwner() + " "
                                         + entry.getValue().getEndDate() + " "
                                         + Double.toString(entry.getValue().getHighestBid()) + " "
                                         + entry.getValue().getHighestBidder() + " "
-                                        + entry.getValue().isGroupBid() + " ("
-                                        + entry.getValue().getFirstConfirmUsername() + " "
+                                        + entry.getValue().isGroupBid());
+                            if (entry.getValue().isGroupBid()) {
+                                list.append(" (" + entry.getValue().getFirstConfirmUsername() + " "
                                         + entry.getValue().getSecondConfirmUsername() + ")"
                                         + "\n");
                             } else {
-                                list.append(entry.getKey().toString() + "." + " '"
-                                        + entry.getValue().getDescription() + "' "
-                                        + entry.getValue().getOwner() + " "
-                                        + entry.getValue().getEndDate() + " "
-                                        + Double.toString(entry.getValue().getHighestBid()) + " "
-                                        + entry.getValue().getHighestBidder() + " "
-                                        + entry.getValue().isGroupBid()
-                                        + "\n");
+                                list.append("\n");
                             }
                         }
                         list.setCharAt(list.length() - 1, ' ');
