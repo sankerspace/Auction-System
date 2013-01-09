@@ -34,7 +34,6 @@ public class Request {
                 udpPort = -1;
             }
         }
-
     }
 
     public Request(String message, String user) throws RequestException {
@@ -117,6 +116,10 @@ public class Request {
             return new String("!end");
         } else if (this.command.contains("!getClientList")) {
             return new String("!getClientList" + " " + this.user);
+        } else if (this.command.contains("!groupBid")) {
+            return new String("!groupBid" + " " + this.user + " " + parameter.bidId + " " + parameter.bidValue);
+        } else if (this.command.contains("!confirm")) {
+            return new String("!confirm" + " " + this.user + " " + parameter.bidId + " " + parameter.bidValue);
         }
         return null;
     }

@@ -11,16 +11,11 @@ import communication.OperationTCP;
 import communication.ServerUDP;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import security.RSAAuthenticationException;
 
 /**
@@ -169,6 +164,10 @@ public class AuctionClient {
                         } else if (req.getCommandName().contains("!getClientList")) {  //TODO Stage4:test this line
                             throw (new RequestException("You must be logged in!\n>"));
                         }else if (!(req.getCommandName().contains("!list"))) {
+                            throw (new RequestException("You must be logged in!\n>"));
+                        } else if (!(req.getCommandName().contains("!groupBid"))) {
+                            throw (new RequestException("You must be logged in!\n>"));
+                        } else if (!(req.getCommandName().contains("!confirm"))) {
                             throw (new RequestException("You must be logged in!\n>"));
                         } 
                     } else {
