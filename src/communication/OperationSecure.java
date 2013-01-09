@@ -252,4 +252,18 @@ public class OperationSecure implements Operation {
     {
         return this.ClientKeyDirectory;
     }
+    
+    public void deleteClient() {
+        this.client = null;
+        this.in = null;
+        this.out = null;
+    }
+    
+    public void setClient(ClientSecure cs) throws ClientException {
+        this.client = cs;
+        this.in = cs.getInputStream();
+        this.out = cs.getOutputStream();
+        cs.copyFromClient(this.client);
+    }
+    
 }
