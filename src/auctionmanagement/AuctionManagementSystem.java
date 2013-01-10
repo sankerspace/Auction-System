@@ -368,7 +368,7 @@ public class AuctionManagementSystem implements Runnable {
                 Account acc=account_map.get(new String(tbe.FirstConfirmUser));
                 if(acc.isOnline())
                 {
-                    a=new Answer("Deadlock state reached.",acc.getClient());
+                    a=new Answer("!rejected Deadlock state reached.",acc.getClient());
                     outgoingmessagechannel.offer(a);
                     tentativeBids.resetFirstConfirmUser(tbe);
                     blockedUser--;
@@ -1041,6 +1041,13 @@ public class AuctionManagementSystem implements Runnable {
                                         && (this.commandtask.end.client.getDestinationPort() == port)) {
                                     auc.deactivateAccount();
                                     account_map.replace(entry.getKey(), auc);
+                                    deleteOnlineUser();
+                                    int online=getNumberofOnlineUser();
+                                    int blocked=getNumberofBlockedUser();
+                                    if(online==blocked)
+                                    {
+                                        timer.schedule((new TentativeClose()), (10000));
+                                    }
                                     logger.output("AMSHandlerThread:end:USER_DISCONNECTED:" + "\n"
                                             + "User " + auc.getName() + " was still logged in.", 2);
                                     /**
