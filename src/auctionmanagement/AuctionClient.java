@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -224,8 +225,10 @@ public class AuctionClient {
                     this.errorlog.output(this.userstatus.getUser() + ">");
                 }
                 this.errorlog.output("AuctionClient wait for input..", 3);
+
              }//if
             }//while
+
         } catch (IOException e) {
             this.errorlog.output("AuctionClientThread:" + e.getMessage());
         } catch (OperationException e) {
@@ -267,7 +270,39 @@ public class AuctionClient {
         Timer timer = new Timer();
         timer.schedule(this.checkServerConnection, 0, 5000);
 
-        //2. Create timestamps
+        //2. Get 2 Random Clients from clientList
+        LightAccount la1 = null;
+        LightAccount la2 = null;
+        
+        String signeBid = null;
+        
+        while (true) {
+            int random_1 = new Random().nextInt(clientList.size() + 1);
+            int random_2 = new Random().nextInt(clientList.size() + 1);
+            
+            if(random_1 != random_2) {
+                la1 = clientList.get(random_1);
+                la2 = clientList.get(random_2);
+                break;
+            }
+        }
+        
+        //3. Send timestamps to those clients if client wrote !bid
+
+            //3a. Connect to those clients
+            /*
+            if(req.contains("!bid")) {
+                
+                Connection con = connectToClient(la1);
+                Connection con_2 = connectToClient(la2);
+                
+                 //3b. Send timestamp to those clients
+                signedBid = signedBid + con.send(!getTimesstamp());
+                signedBid = signedbid + " : " + con_2.send(!getTimestamp());
+                
+                
+            }*/
+        //4. Save timestamps and put them into signedBid
         //TODO
     }
 
@@ -360,10 +395,10 @@ public class AuctionClient {
                             if(s.length==2)
                                 out.output(s[1]);
                         } else if (msg.contains("Active Clients:")) {
-                            String clientListString = msg.replace("Active Clients:\n","");
-                            
+                            String clientListString = msg.replace("Active Clients:\n", "");
+
                             String[] splitted = clientListString.split("\n");
-                            for(String client : splitted) {
+                            for (String client : splitted) {
                                 String[] sub_1 = client.split(" "); //<Host:port> <-> <Name>
                                 String[] sub_2 = sub_1[0].split(":"); //<Host> <port>
                                 LightAccount la = new LightAccount();
@@ -448,6 +483,7 @@ public class AuctionClient {
     }
 
     private class LightAccount {
+
         public String name;
         public String host;
         public int udpPort;
