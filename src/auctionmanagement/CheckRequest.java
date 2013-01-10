@@ -253,7 +253,26 @@ public class CheckRequest {
                 return false;
             }
             return true;
-        } 
+        } else if (command.contains("!signedBid")) {
+            if ((tokenizedMessage.length) < 9) {
+                return false;
+            }
+            parameter = new Request.Parameter();
+            parameter.user_1 = tokenizedMessage[1];
+            parameter.user_2 = tokenizedMessage[2];
+            int id = Integer.parseInt(tokenizedMessage[3]);
+            double amount = Double.parseDouble(tokenizedMessage[4]);
+            if (amount < 1) {
+                return false;
+            }
+            parameter.bidId = id;
+            parameter.bidValue = amount;
+            parameter.timestamp_1 = tokenizedMessage[5];
+            parameter.signature_1 = tokenizedMessage[6];
+            parameter.timestamp_2 = tokenizedMessage[7];
+            parameter.signature_2 = tokenizedMessage[8];
+            return true;
+        }
         return false;
     }
 

@@ -9,6 +9,7 @@ import communication.Client;
 public class Request {
 
     private String user = "none";
+    private String user_2 = "none";
     private String command = null;
     private Parameter parameter = null;
     private int udpPort;
@@ -28,6 +29,7 @@ public class Request {
             if (parameter.loginuser != null) {
                 user = parameter.loginuser;
             }
+            
             if (parameter.loginUdpPort != -1) {
                 udpPort = parameter.loginUdpPort;
             } else {
@@ -120,6 +122,10 @@ public class Request {
             return new String("!groupBid" + " " + this.user + " " + parameter.bidId + " " + parameter.bidValue);
         } else if (this.command.contains("!confirm")) {
             return new String("!confirm" + " " + this.user + " " + parameter.bidId + " " + parameter.bidValue);
+        } else if (this.command.contains("!signedBid")) {
+            return new String("!signedBid" + " " + this.user + " " + parameter.bidId + " " + parameter.bidValue + 
+                    " " + parameter.user_1 + ":" + parameter.timestamp_1 + ":" + parameter.signature_1 + 
+                    " " + parameter.user_2 + ":" + parameter.timestamp_2 + ":" + parameter.signature_2);
         }
         return null;
     }
@@ -156,5 +162,11 @@ public class Request {
         public int bidId = -1;
         public String loginuser = null;
         public int loginUdpPort = -1;
+        public String user_1 = null;
+        public String user_2 = null;
+        public String timestamp_1 = null;
+        public String signature_1 = null;
+        public String timestamp_2 = null;
+        public String signature_2 = null;
     }
 }
