@@ -46,7 +46,7 @@ public class TentativeBids {
     }
     
     
-    public  boolean insertnewTentativeBid(long auctionID,
+    protected  boolean insertnewTentativeBid(long auctionID,
             String groupBidUser,
             double amount)
     {   //1) and 3) and 2)
@@ -85,17 +85,17 @@ public class TentativeBids {
         
     }
     
-    public int getNumberofTentativeBids()
+    protected int getNumberofTentativeBids()
     {
         return this.map.size();
     }
     
-    public boolean isalreadyinsertedAuctionID(long auctionID)
+    protected boolean isalreadyinsertedAuctionID(long auctionID)
     {
         boolean b=map.containsKey(new Long(auctionID)); 
         return b;
     }
-    public boolean AuctionhasOneConfirmer(long auctionID)
+    protected boolean AuctionhasOneConfirmer(long auctionID)
     {
         
         TentativeBidEntry tbe=this.map.get(auctionID);
@@ -107,7 +107,7 @@ public class TentativeBids {
             return false;
     }
     
-    public  boolean isalreadyregistratedgroupBidUser(String user)
+    protected  boolean isalreadyregistratedgroupBidUser(String user)
     {
         TentativeBidEntry tbe=null;
         Set<Entry<Long,TentativeBidEntry>> entrySet=map.entrySet();
@@ -124,7 +124,7 @@ public class TentativeBids {
         return false;
     }
     
-    public  boolean isalreadyregistratedAsFirstConfirmedUser(String user)
+    protected  boolean isalreadyregistratedAsFirstConfirmedUser(String user)
     {
         TentativeBidEntry tbe=null;
         String FirstConfirmUser=null;
@@ -146,7 +146,7 @@ public class TentativeBids {
         return false;
     }
     
-   public  boolean isvalidConfirm(long AuctionID,double amount)
+   protected  boolean isvalidConfirm(long AuctionID,double amount)
    {
        TentativeBidEntry tbe=getEntry(new Long(AuctionID));
        if(tbe==null)
@@ -157,12 +157,39 @@ public class TentativeBids {
        
    }
     
-    
-    private  TentativeBidEntry getEntry(Long AuctionID)
+    protected void resetFirstConfirmUser(TentativeBidEntry tbe)
+    {
+        tbe.FirstConfirmUser=null;    
+        
+    }
+            
+    protected  TentativeBidEntry getEntry(Long AuctionID)
     {
   
         TentativeBidEntry tbe=this.map.get(AuctionID);
         return tbe;
+    }
+    
+     protected  TentativeBidEntry getnextEntrywithBlockedUser()
+    {
+        
+        TentativeBidEntry tbe=null;
+        String FirstConfirmUser=null;
+        Set<Entry<Long,TentativeBidEntry>> entrySet=map.entrySet();
+        Iterator<Entry<Long,TentativeBidEntry>> iter =entrySet.iterator();
+        while(iter.hasNext())
+        {
+            Entry<Long,TentativeBidEntry> entry = iter.next();
+            tbe=entry.getValue();
+            FirstConfirmUser=tbe.getFirstConfirmUser();
+            if(FirstConfirmUser!=null)
+            {
+                return tbe;
+                   
+            }
+            
+        }
+        return null;
     }
     
     
@@ -180,7 +207,7 @@ public class TentativeBids {
      * 
      * 
      */
-    public  TentativeBidEntry  confirm(String user,long AuctionID)
+    protected  TentativeBidEntry  confirm(String user,long AuctionID)
     {
         TentativeBidEntry tmp=null;
         Long key=new Long(AuctionID);
@@ -197,7 +224,7 @@ public class TentativeBids {
         return null;
     }
     
-    public TentativeBidEntry remove(long AuctionID)
+    protected TentativeBidEntry remove(long AuctionID)
     {
         return this.map.remove(new Long(AuctionID));
     }

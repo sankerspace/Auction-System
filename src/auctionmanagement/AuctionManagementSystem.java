@@ -348,6 +348,39 @@ public class AuctionManagementSystem implements Runnable {
              }*/
         }//run()
     }
+    
+    public class TentativeClose extends TimerTask {
+
+        
+
+        public TentativeClose() {
+            
+
+        }
+
+        public void run() {
+            
+            Answer a =null;
+            lockForBlockedUser.lock();
+            while(blockedUser>0)
+            {
+                TentativeBidEntry tbe= tentativeBids.getnextEntrywithBlockedUser();
+                Account acc=account_map.get(new String(tbe.FirstConfirmUser));
+                if(acc.isOnline())
+                {
+                    a=new Answer("Deadlock state reached.",acc.getClient());
+                    outgoingmessagechannel.offer(a);
+                    tentativeBids.resetFirstConfirmUser(tbe);
+                    blockedUser--;
+                }
+            }
+            lockForBlockedUser.unlock();
+            
+        }
+    }
+          
+    
+    
 
     public class AMS_Handler implements Runnable {
 
@@ -591,6 +624,13 @@ public class AuctionManagementSystem implements Runnable {
                             Answer a = new Answer(answer, commandtask.logout.client);
                             outgoingmessagechannel.offer(a);
                             deleteOnlineUser();
+                            /**Check Deadlock status again***/
+                            int online=getNumberofOnlineUser();
+                            int blocked=getNumberofBlockedUser();
+                            if(online==blocked)
+                            {
+                                timer.schedule((new TentativeClose()), (10000));
+                            }
 
                             /**
                              * ********* RMI ******************************
