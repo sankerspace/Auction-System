@@ -43,9 +43,23 @@ public class PartBServer {
         tcpPort=Integer.valueOf(arguments[0]);
         analytic = arguments[1];
         billing=arguments[2];
-        ServerPrivateKeyFilename=arguments[3];
+        String s=arguments[3];
+        String[] spl=s.split("/");
+        if(spl.length>1)
+        {
+            ServerPrivateKeyFilename=spl[spl.length-1];
+            ServerKeyDirectoryname=s.replace(ServerPrivateKeyFilename, "");
+        }else
+        {
+          ServerPrivateKeyFilename=spl[0];
+          ServerKeyDirectoryname="./";
+        }
+        
+        
         ClientKeyDirectoryname=arguments[4];
-        ServerKeyDirectoryname="keys/Server/";
+        
+        
+        
         if(ServerPrivateKeyFilename.contains(".pem"))
             ServerPrivateKeyFilename=ServerPrivateKeyFilename.replace(".pem", "");
        

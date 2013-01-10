@@ -46,9 +46,20 @@ public class PartBClient {
        try{
             tcpPort=Integer.parseInt(this.arguments[1]);
             udpPort=Integer.parseInt(this.arguments[2]);
-            ServerPublicKeyFilename=this.arguments[3];
             ClientKeyDirectoryname=this.arguments[4];
-            ServerKeyDirectoryname="keys/Server/";
+           
+            
+            String s=arguments[3];
+             String[] spl=s.split("/");
+            if(spl.length>1)
+            {
+                ServerPublicKeyFilename=spl[spl.length-1];
+                ServerKeyDirectoryname=s.replace(ServerPublicKeyFilename, "");
+            }else
+            {
+                ServerPublicKeyFilename=spl[0];
+                ServerKeyDirectoryname="./";
+            }
             
             if(ServerPublicKeyFilename.contains(".pub.pem"))
                 ServerPublicKeyFilename=ServerPublicKeyFilename.replace(".pub.pem","");
