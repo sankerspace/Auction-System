@@ -232,6 +232,23 @@ public class AuctionManagementSystem implements Runnable {
             } else {
                 bidder = account_map.get(this.auc.getHighestBidder());
             }
+            Answer answer=null;
+            if(tentativeBids.isalreadyinsertedAuctionID(auction_id))
+            {
+                //if a auction ends , all blocked User must be rejected
+                TentativeBidEntry tbe=tentativeBids.remove(auction_id);
+                String BlockedUser=tbe.getFirstConfirmUser();
+                if(BlockedUser!=null)
+                {
+                   Account acc=account_map.get(new String(BlockedUser));
+                   if(acc.isOnline())
+                   {
+                       answer=new Answer("!reject Auction has expanded.",acc.getClient());
+                       outgoingmessagechannel.offer(answer);
+                   }
+                   
+                }
+            }
 
             /**
              * ********* RMI ******************************
@@ -369,14 +386,15 @@ public class AuctionManagementSystem implements Runnable {
                                         + entry.getValue().getOwner() + " "
                                         + entry.getValue().getEndDate() + " "
                                         + Double.toString(entry.getValue().getHighestBid()) + " "
-                                        + entry.getValue().getHighestBidder() + " "
-                                        + entry.getValue().isGroupBid());
+                                        + entry.getValue().getHighestBidder() + " ");
                             if (entry.getValue().isGroupBid()) {
-                                list.append(" (" + entry.getValue().getFirstConfirmUsername() + " "
-                                        + entry.getValue().getSecondConfirmUsername() + ")"
-                                        + "\n");
+                                list.append(
+                                        "GroupBid"+" "
+                                      + entry.getValue().getFirstConfirmUsername() + " "
+                                      + entry.getValue().getSecondConfirmUsername()
+                                      + "\n");
                             } else {
-                                list.append("\n");
+                                list.append("RegularBid\n");
                             }
                         }
                         list.setCharAt(list.length() - 1, ' ');
@@ -662,6 +680,7 @@ public class AuctionManagementSystem implements Runnable {
 
                 Auction auc = null;
                 boolean issuccesfullyBid;
+                boolean isOnline;
                 try {
                     logger.output("AMSHandlerThread:Bid:start", 2);
                     Long id = new Long(commandtask.bid.id);
@@ -682,8 +701,10 @@ public class AuctionManagementSystem implements Runnable {
                     if (auc == null) {
                         throw new Exception("Auction id is not avaible,canbot bid.");
                     }
+                    Account acc=account_map.get(new String(commandtask.bid.user));
+                    isOnline=acc.isOnline();
                     //Set a Normal Bid or set a GroupBid
-                    if(auc.isGroupBid())
+                    if(this.commandtask.bid.isGroupBid)
                     {
                         issuccesfullyBid=auc.setnewGroupBid(commandtask.bid.user,
                                 commandtask.bid.firstconfirmer, 
@@ -700,14 +721,16 @@ public class AuctionManagementSystem implements Runnable {
                         auction_map.replace(id, auc);
 
                         String not = "!new-bid" + " " + auc.getDescription();
+                        if(isOnline)
+                        {
+                            String ans;
+                            ans = "You succesfully bid with"
+                                    + " " + auc.getHighestBid() + " "
+                                    + "on" + " '" + auc.getDescription() + "'.";
 
-                        String ans;
-                        ans = "You succesfully bid with"
-                                + " " + auc.getHighestBid() + " "
-                                + "on" + " '" + auc.getDescription() + "'.";
-
-                        Answer a = new Answer(ans, commandtask.bid.client);
-                        outgoingmessagechannel.offer(a);
+                            Answer a = new Answer(ans, commandtask.bid.client);
+                            outgoingmessagechannel.offer(a);
+                        }
 
                         /**
                          * ********* RMI ******************************
@@ -789,14 +812,17 @@ public class AuctionManagementSystem implements Runnable {
 
                     } else {
                         logger.output("AMSHandlerThread:Bid:unsuccesful", 3);
-                        String ans = new String("You unsuccesfully bid with"
-                                + " " + commandtask.bid.amount + " "
-                                + "on" + " '" + auc.getDescription() + "'."
-                                + " Current highest bid is" + " "
-                                + auc.getHighestBid() + ".");
+                         if(isOnline)
+                        {
+                            String ans = new String("You unsuccesfully bid with"
+                                    + " " + commandtask.bid.amount + " "
+                                    + "on" + " '" + auc.getDescription() + "'."
+                                    + " Current highest bid is" + " "
+                                    + auc.getHighestBid() + ".");
 
-                        Answer a = new Answer(ans, commandtask.bid.client);
-                        outgoingmessagechannel.offer(a);
+                            Answer a = new Answer(ans, commandtask.bid.client);
+                            outgoingmessagechannel.offer(a);
+                        }
                     }
 
                 } catch (NullPointerException e) {
@@ -813,17 +839,13 @@ public class AuctionManagementSystem implements Runnable {
                 boolean b;
                Answer a=null;
                Auction auc=null;
-                boolean isvalidAuction=auction_map.containsKey(new Integer(commandtask.groupbid.id));
-                if(isvalidAuction)
-                    auc=auction_map.get(new Integer(commandtask.groupbid.id));
-                else
-                     a=new Answer("!rejected Failure in setting up"+
-                                        "a new GroupBid on AuctionID "+commandtask.groupbid.id
-                                    ,commandtask.groupbid.client); 
-                int countGroupBid=tentativeBids.getNumberofTentativeBids();
-                int onlineUser=getNumberofOnlineUser();
+                boolean isvalidAuction=auction_map.containsKey(new Long(commandtask.groupbid.id));
+
                 /*Number of group bids must be less or equal to the number of active users*/
                 if(isvalidAuction){
+                    auc=auction_map.get(new Long(commandtask.groupbid.id));
+                    int countGroupBid=tentativeBids.getNumberofTentativeBids();
+                    int onlineUser=getNumberofOnlineUser();
                     if(( (countGroupBid+1)<=onlineUser) )
                     {
                         if(!tentativeBids.isalreadyinsertedAuctionID(commandtask.groupbid.id))
@@ -868,7 +890,7 @@ public class AuctionManagementSystem implements Runnable {
                     }
                 }else
                 {
-                     a=new Answer("!rejected AuctionID not valid.."
+                     a=new Answer("!rejected AuctionID not valid."
                                 ,commandtask.groupbid.client);
                 }
                 
@@ -876,14 +898,17 @@ public class AuctionManagementSystem implements Runnable {
                 
 ////////////////////////////////////////////////////////////////////////////////////
             }else if(this.commandtask.confirmbid!=null){
-                boolean validAuction=tentativeBids.isalreadyinsertedAuctionID(onlineUser);
+                boolean validConfirm=tentativeBids.isvalidConfirm(commandtask.confirmbid.id,
+                        commandtask.confirmbid.amount);
                 //cannot be a confirmer if the user is blocked
                 boolean isalredyFirstConfirmer=tentativeBids.isalreadyregistratedAsFirstConfirmedUser(commandtask.confirmbid.user);
                 //boolean isalreadygroupBidUser =tentativeBids.isalreadyregistratedgroupBidUser(commandtask.confirmbid.user);
+                
                 boolean auctionhasOneConfirmer=tentativeBids.AuctionhasOneConfirmer(commandtask.confirmbid.id);
                 int onlineUser=getNumberofOnlineUser();
                 int blockedUser=getNumberofBlockedUser();
-                Answer firstConfirmer=null;
+                
+                Answer FirstConfirmer=null;
                 Answer SecondConfirmer=null;
                 CommandTask commandtask_=null;
                 //if a other CommandTask must be triggered
@@ -891,45 +916,70 @@ public class AuctionManagementSystem implements Runnable {
                 
                 /**Check DeadLock status if auction has no confirmer**/
                 //if no DeadLock status will be reached
-                if(validAuction)
-                {
-                    if((!auctionhasOneConfirmer)&&(onlineUser>(blockedUser+1))) 
-                    {
-
-                        if(!isalredyFirstConfirmer)
+                if(validConfirm)
+                {   //a confirm would block completely, because no other confirm is avaible
+                    if(!auctionhasOneConfirmer) 
+                    {   //proof Deadlock state
+                        if((onlineUser>(blockedUser+1)))
                         {
-                             TentativeBidEntry tbe=new TentativeBidEntry();
-                             boolean b=tentativeBids.confirm(commandtask.confirmbid.user,
-                                     commandtask.confirmbid.id,
-                                     commandtask.confirmbid.amount, 
-                                     tbe);
-                            if(b)
+                            if(!isalredyFirstConfirmer)
                             {
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                            }else{
-
-
-                            }
+                                tentativeBids.confirm(commandtask.confirmbid.user,
+                                            commandtask.confirmbid.id);
+                                //isfirstConfirm
+                                FirstConfirmer=new Answer("Confirm successfuly.",
+                                commandtask.confirmbid.client);
+                                addBlockedUser();  
+  
+                            }else
+                            {
+                                FirstConfirmer=new Answer("!rejected  Broken user statemachine.",commandtask.confirmbid.client);
+                            }  
 
                         }else
                         {
-                            firstConfirmer=new Answer("!rejected  Broken user statemachine.",commandtask.confirmbid.client);
-                        }                
+                           ////A DeadLock status would be entered
+                            SecondConfirmer=new Answer("!rejected Deadlock state reached.",commandtask.confirmbid.client); 
+                        }
                     }else{
-                    ////A DeadLock status would be entered
-                        SecondConfirmer=new Answer("!rejected Deadlock state reached.",commandtask.confirmbid.client);
+                       
+                        TentativeBidEntry tbe=tentativeBids.confirm(commandtask.confirmbid.user,
+                                            commandtask.confirmbid.id);
+                        //is secondConfirm
+                        if(tbe!=null)
+                        {
+
+                            Account acc=account_map.get(new String(tbe.getFirstConfirmUser()));
+                            Account acc2=account_map.get(new String(tbe.groupBidUser));
+                            Client clientFistConfirmer=acc.getClient();
+                            FirstConfirmer=new Answer("!confirmed",clientFistConfirmer);
+                            SecondConfirmer=new Answer("!confirmed",commandtask.confirmbid.client);
+                            CommandTask.Bid bid = new CommandTask.Bid(
+                                    acc2.getClient(),
+                                    tbe.groupBidUser,
+                                    tbe.getFirstConfirmUser(),
+                                    tbe.getSecondConfirmUser(),
+                                    tbe.getAuctionID(),
+                                    tbe.getBid());
+                            commandtask_=new CommandTask(bid);
+                            deleteBlockedUser();
+                        }else
+                        {
+                           FirstConfirmer=new Answer("!rejected  Broken user statemachine.",commandtask.confirmbid.client);
+                        } 
+
                     }
                 }else
                 {
-                    
+                    FirstConfirmer=new Answer("!rejected  Confirm doesn't correspond to a valid auction.",commandtask.confirmbid.client);                    
                 }
 
-                if(firstConfirmer!=null)
-                    outgoingmessagechannel.offer(firstConfirmer);
+                if(FirstConfirmer!=null)
+                    outgoingmessagechannel.offer(FirstConfirmer);
                 if(SecondConfirmer!=null)
                     outgoingmessagechannel.offer(SecondConfirmer);
-                if(commandtask!=null)
-                    outgoingrequest.offer(commandtask);
+                if(commandtask_!=null)
+                    outgoingrequest.offer(commandtask_);
                     
 /////////////////////////////////////////////////////////////////////////////////////////////////77             
             }else if (this.commandtask.end != null) {

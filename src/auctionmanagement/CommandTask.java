@@ -193,11 +193,11 @@ public class CommandTask {
         String user = null;
         String firstconfirmer=null;
         String secondconfirmer=null;
-        int id;
+        long id;
         double amount;
         boolean isGroupBid;
 
-        public Bid(Client client, String user, int id, double amount) {
+        public Bid(Client client, String user, long id, double amount) {
             this.client = client;
             this.amount = amount;
             this.id = id;
@@ -212,7 +212,7 @@ public class CommandTask {
             StrRepr.append("\n" + "Bid:amount:" + this.amount);
         }
         
-         public Bid(Client client, String user,String firstconfirm,String secondconfirm, int id, double amount) {
+         public Bid(Client client, String user,String firstconfirm,String secondconfirm, long id, double amount) {
             this.client = client;
             this.amount = amount;
             this.id = id;

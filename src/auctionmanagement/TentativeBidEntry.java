@@ -9,12 +9,12 @@ package auctionmanagement;
  * @author sanker
  */
 public class TentativeBidEntry {
-    int auctionID=0;
+    long auctionID=0;
     String groupBidUser=null;
     String FirstConfirmUser=null;
     String SecondConfirmUser=null;
     double amount;
-    TentativeBidEntry(int auctionID,
+    TentativeBidEntry(long auctionID,
             String groupBidUser,
             double amount){
         this.amount=amount;
@@ -28,49 +28,42 @@ public class TentativeBidEntry {
         this.groupBidUser=null;        
     }
     
-    public int getAuctionID()
+    public synchronized long getAuctionID()
     {
         return this.auctionID;
     }
     
-    public String getFirstConfirmUser()
+    public synchronized  String getFirstConfirmUser()
     {
         return this.FirstConfirmUser;
     }
     
-    public String getSecondConfirmUser()
+    public  synchronized  String getSecondConfirmUser()
     {
         return this.SecondConfirmUser;
     }
     
-    public String getgroupBidUser()
+    public synchronized   String getgroupBidUser()
     {
         return this.groupBidUser;
     }
      
-    public double getBid()
+    public synchronized   double getBid()
     {
         return this.amount;
     }
     
-    public void setSecondConfirmUser(String user)
+    public synchronized   void setSecondConfirmUser(String user)
     {
         this.SecondConfirmUser=user;
     }
     
-    public void setFirstConfirmUser(String user)
+    public synchronized   void setFirstConfirmUser(String user)
     {
         this.FirstConfirmUser=user;
     }
     
-    public void copy(TentativeBidEntry tbe)
-    {
-        this.FirstConfirmUser=tbe.FirstConfirmUser;
-        this.SecondConfirmUser=tbe.SecondConfirmUser;
-        this.amount=tbe.amount;
-        this.auctionID=tbe.auctionID;
-        this.groupBidUser=tbe.groupBidUser;
-    }   
+    
             
     
    

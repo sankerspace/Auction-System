@@ -35,7 +35,7 @@ public class PartBClient {
        
         arguments=args;
          
-         output=new Log(new PrintWriter(System.out),3); 
+         output=new Log(new PrintWriter(System.out)); 
     }
     
    public boolean checkandgetArguments()

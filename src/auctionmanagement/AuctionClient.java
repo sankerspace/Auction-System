@@ -43,12 +43,14 @@ public class AuctionClient {
     private LinkedList<LightAccount> clientList = null; //Stage4:List of clients, filled by !getClientList command
     private ReentrantLock lockForSendingSocket = null; //for synced communication between AuctionClient and AuctionTCPHandler
     private TimerTask checkServerConnection = null;
+    private boolean flagblockUserInput;
 
     public AuctionClient(final String host, final int tcpPort, int udpPort,
             String ServerPublicKeyFilename,
             String ClientKeyDirectoryname,
             String ServerKeyDirectoryname,
             Log output) throws AuctionClientException {
+        flagblockUserInput=false;
         this.clientList = new LinkedList<LightAccount>();
         this.errorlog = output;
         userstatus = new ClientStatus("none");
@@ -93,6 +95,7 @@ public class AuctionClient {
         this.errorlog = output;
         userstatus = new ClientStatus("none");
         try {
+            flagblockUserInput=false;
             //this.handleUDP=new AuctionClientUDPHandler(output);
             this.udpPort = udpPort;
             this.ServerPublicKeyFilename = ServerPublicKeyFilename;
@@ -135,7 +138,8 @@ public class AuctionClient {
             //without login only regular channel to the server is established
             operation = new OperationTCP(this.clientTCP);
 
-            while ((line = in.readLine()) != null) {
+            while (((line = in.readLine()) != null)) {
+             if(!this.flagblockUserInput){
                 this.errorlog.output("AuctionClient input:" + line, 3);
                 try {
                     if (this.userstatus.noUser()) {
@@ -163,15 +167,9 @@ public class AuctionClient {
                             this.userstatus.setUser(req.getUserName());
                             req = null;
                             //req.setUdpPort(this.udpPort);
-                        } else if (req.getCommandName().contains("!getClientList")) {  //TODO Stage4:test this line
+                        }else if (!(req.getCommandName().contains("!list"))) {
                             throw (new RequestException("You must be logged in!\n>"));
-                        } else if (!(req.getCommandName().contains("!list"))) {
-                            throw (new RequestException("You must be logged in!\n>"));
-                        } else if (!(req.getCommandName().contains("!groupBid"))) {
-                            throw (new RequestException("You must be logged in!\n>"));
-                        } else if (!(req.getCommandName().contains("!confirm"))) {
-                            throw (new RequestException("You must be logged in!\n>"));
-                        }
+                        } 
                     } else {
                         if (line.length() < 4) {
                             continue;
@@ -189,7 +187,9 @@ public class AuctionClient {
                         } else if (req.getCommandName().contains("!login")) {
                             throw (new RequestException("You must log out!" + "\n"
                                     + this.userstatus.getUser() + ">"));
-                        }
+                        } else if((req.getCommandName().contains("!confirm"))) {
+                            this.flagblockUserInput=true;
+                        } 
                     }
                     //if a request object is avaible, send the created String to the server
                     if (req != null) {
@@ -224,8 +224,8 @@ public class AuctionClient {
                     this.errorlog.output(this.userstatus.getUser() + ">");
                 }
                 this.errorlog.output("AuctionClient wait for input..", 3);
-
-            }
+             }//if
+            }//while
         } catch (IOException e) {
             this.errorlog.output("AuctionClientThread:" + e.getMessage());
         } catch (OperationException e) {
@@ -333,15 +333,16 @@ public class AuctionClient {
                             }
                             out.output("AuctionClientTCPHandlerThread:OpSecure initialized.", 3);
                         } else if (msg.contains("list")) {
-                            msg = (msg.split("%"))[1];
-                            out.output(msg);
+                            String[] s=msg.split("%");
+                            if(s.length==2)
+                                out.output(s[1]);
                         } else {
                             out.output(msg);
                         }
 
                     } else {
                         /*SECURE communication*/
-                        msg = opSecurewithHmac.readString();
+                       msg = opSecurewithHmac.readString();
                         if (msg.contains("!dummy")) {
                             this.setRegularChannel();
                             this.opSecurewithHmac = null;
@@ -356,7 +357,8 @@ public class AuctionClient {
                                     lockForSendingSocket.unlock();
                                 }
                             }
-                            out.output(s[1]);
+                            if(s.length==2)
+                                out.output(s[1]);
                         } else if (msg.contains("Active Clients:")) {
                             String clientListString = msg.replace("Active Clients:\n","");
                             
@@ -371,7 +373,14 @@ public class AuctionClient {
                                 clientList.add(la);
                             }
                             out.output(msg);
-                        }  else {
+                        } else if(msg.contains("!rejected")){
+                            flagblockUserInput=false;
+                            msg=msg.replace("!rejected ", "");
+                            out.output(msg);
+                        } else if(msg.contains("!confirmed")){
+                            flagblockUserInput=false;
+                             out.output("GroupBid was successfully confirmed.");
+                        } else {
                             isSecondAttemptforListCommand = false;
                             out.output(msg);
                         }

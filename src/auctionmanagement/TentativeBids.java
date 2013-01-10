@@ -36,17 +36,17 @@ import java.util.concurrent.ConcurrentHashMap;
      */
 public class TentativeBids {
     //<AuctionID,TentativeBidEntry>
-    private ConcurrentHashMap<Integer,TentativeBidEntry> map=null;
-    private int blockedUser=0;
+    private ConcurrentHashMap<Long,TentativeBidEntry> map=null;
+    
     
     
     TentativeBids()
     {
-        map=new ConcurrentHashMap<Integer,TentativeBidEntry>();
+        map=new ConcurrentHashMap<Long,TentativeBidEntry>();
     }
     
     
-    public synchronized boolean insertnewTentativeBid(int auctionID,
+    public  boolean insertnewTentativeBid(long auctionID,
             String groupBidUser,
             double amount)
     {   //1) and 3) and 2)
@@ -55,18 +55,23 @@ public class TentativeBids {
             return false;
         //check for same groupBidUser
         TentativeBidEntry tbe=null;
-        Set<Entry<Integer,TentativeBidEntry>> entrySet=map.entrySet();
-        Iterator<Entry<Integer,TentativeBidEntry>> iter =entrySet.iterator();
+        Set<Entry<Long,TentativeBidEntry>> entrySet=map.entrySet();
+        Iterator<Entry<Long,TentativeBidEntry>> iter =entrySet.iterator();
+        String FirstConfirmUser=null;
         while(iter.hasNext())
         {
-            Entry<Integer,TentativeBidEntry> entry = iter.next();
+            Entry<Long,TentativeBidEntry> entry = iter.next();
             tbe=entry.getValue();
             /* 3) */
             if(tbe.getgroupBidUser().contentEquals(groupBidUser))
                 return false;
             /*5a) FirstConfirmuser should be in blocked Mode   */
-            if(tbe.getFirstConfirmUser().contentEquals(groupBidUser))
-                return false;
+            FirstConfirmUser=tbe.getFirstConfirmUser();
+            if(FirstConfirmUser!=null)
+            {
+                if(FirstConfirmUser.contentEquals(groupBidUser))
+                    return false;
+            }
             
             
         }
@@ -85,28 +90,31 @@ public class TentativeBids {
         return this.map.size();
     }
     
-    public boolean isalreadyinsertedAuctionID(int auctionID)
+    public boolean isalreadyinsertedAuctionID(long auctionID)
     {
-        boolean b=map.containsKey(new Integer(auctionID)); 
+        boolean b=map.containsKey(new Long(auctionID)); 
         return b;
     }
-    public boolean AuctionhasOneConfirmer(int auctionID)
+    public boolean AuctionhasOneConfirmer(long auctionID)
     {
+        
         TentativeBidEntry tbe=this.map.get(auctionID);
+        if(tbe==null)
+            return false;
         if(tbe.getFirstConfirmUser()!=null)
             return true;
         else
             return false;
     }
     
-    public boolean isalreadyregistratedgroupBidUser(String user)
+    public  boolean isalreadyregistratedgroupBidUser(String user)
     {
         TentativeBidEntry tbe=null;
-        Set<Entry<Integer,TentativeBidEntry>> entrySet=map.entrySet();
-        Iterator<Entry<Integer,TentativeBidEntry>> iter =entrySet.iterator();
+        Set<Entry<Long,TentativeBidEntry>> entrySet=map.entrySet();
+        Iterator<Entry<Long,TentativeBidEntry>> iter =entrySet.iterator();
         while(iter.hasNext())
         {
-            Entry<Integer,TentativeBidEntry> entry = iter.next();
+            Entry<Long,TentativeBidEntry> entry = iter.next();
             tbe=entry.getValue();
             if(tbe.getgroupBidUser().contentEquals(user))
                 return true;
@@ -116,15 +124,15 @@ public class TentativeBids {
         return false;
     }
     
-    public boolean isalreadyregistratedAsFirstConfirmedUser(String user)
+    public  boolean isalreadyregistratedAsFirstConfirmedUser(String user)
     {
         TentativeBidEntry tbe=null;
         String FirstConfirmUser=null;
-        Set<Entry<Integer,TentativeBidEntry>> entrySet=map.entrySet();
-        Iterator<Entry<Integer,TentativeBidEntry>> iter =entrySet.iterator();
+        Set<Entry<Long,TentativeBidEntry>> entrySet=map.entrySet();
+        Iterator<Entry<Long,TentativeBidEntry>> iter =entrySet.iterator();
         while(iter.hasNext())
         {
-            Entry<Integer,TentativeBidEntry> entry = iter.next();
+            Entry<Long,TentativeBidEntry> entry = iter.next();
             tbe=entry.getValue();
             FirstConfirmUser=tbe.getFirstConfirmUser();
             if(FirstConfirmUser!=null)
@@ -138,7 +146,19 @@ public class TentativeBids {
         return false;
     }
     
-    private TentativeBidEntry getEntry(Integer AuctionID)
+   public  boolean isvalidConfirm(long AuctionID,double amount)
+   {
+       TentativeBidEntry tbe=getEntry(new Long(AuctionID));
+       if(tbe==null)
+           return false;
+       if(tbe.getBid()!=amount)
+           return false;
+       return true;
+       
+   }
+    
+    
+    private  TentativeBidEntry getEntry(Long AuctionID)
     {
   
         TentativeBidEntry tbe=this.map.get(AuctionID);
@@ -160,29 +180,26 @@ public class TentativeBids {
      * 
      * 
      */
-    public synchronized boolean confirm(String user,int AuctionID,double amount,TentativeBidEntry tbe)
+    public  TentativeBidEntry  confirm(String user,long AuctionID)
     {
-        tbe=null;
         TentativeBidEntry tmp=null;
-        Integer key=new Integer(AuctionID);
-        if(this.isalreadyregistratedAsFirstConfirmedUser(user))
-            return false;
-        if(!this.map.containsKey(key))
-            return false;
+        Long key=new Long(AuctionID);
         tmp=this.getEntry(key);
-        if(tmp.getBid()!=amount)
-            return false;
         if(tmp.getFirstConfirmUser()==null)
             tmp.setFirstConfirmUser(user);
+            
         else
         {
             tmp.setSecondConfirmUser(user);
-            tbe.copy(tbe);
             this.map.remove(key);
-            
+            return tmp;
         }
-        return true;
-
+        return null;
+    }
+    
+    public TentativeBidEntry remove(long AuctionID)
+    {
+        return this.map.remove(new Long(AuctionID));
     }
       
 }

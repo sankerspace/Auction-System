@@ -89,6 +89,7 @@ public class Auction {
         }
         this.highest_bid_amount = bid;
         this.highest_bidder = bidder;
+        this.isgroupBid=false;
         return true;
     }
 
@@ -101,6 +102,7 @@ public class Auction {
         this.highest_bidder = GroupBidder;
         this.FirstConfirmfromUser = firstconfirm;
         this.SecondConfirmfromUser = secondconfirm;
+        this.isgroupBid=true;
         return true;
     }
 
