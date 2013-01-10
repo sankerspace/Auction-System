@@ -224,7 +224,6 @@ public class AuctionClient {
                     this.errorlog.output(this.userstatus.getUser() + ">");
                 }
                 this.errorlog.output("AuctionClient wait for input..", 3);
-
             }
         } catch (IOException e) {
             this.errorlog.output("AuctionClientThread:" + e.getMessage());
