@@ -22,6 +22,12 @@ public class TentativeBidEntry {
         this.groupBidUser=groupBidUser;        
     }
     
+    TentativeBidEntry(){
+        this.amount=0;
+        this.auctionID=0;
+        this.groupBidUser=null;        
+    }
+    
     public int getAuctionID()
     {
         return this.auctionID;
@@ -56,6 +62,16 @@ public class TentativeBidEntry {
     {
         this.FirstConfirmUser=user;
     }
+    
+    public void copy(TentativeBidEntry tbe)
+    {
+        this.FirstConfirmUser=tbe.FirstConfirmUser;
+        this.SecondConfirmUser=tbe.SecondConfirmUser;
+        this.amount=tbe.amount;
+        this.auctionID=tbe.auctionID;
+        this.groupBidUser=tbe.groupBidUser;
+    }   
+            
     
    
 }

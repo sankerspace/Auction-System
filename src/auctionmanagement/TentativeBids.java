@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
      * 3)groupBidUser must be unique,
      * only one groupBid allowed for one user because of
      * Starvation prevention of auctionsystem  
-     * 4)view on all tentaiveBids must a subset of all active auctions
+     * 4)view on all tentaiveBids must be a subset of all active auctions
      * 5)grouBidUser is  allowed to be also a FirstConfirmUser,
      * but vice vers it is NOT allowed
      * 5a)If a user is in blocked Mode[a FirstConfirmuser]he can not enter a groupbid
@@ -36,9 +36,9 @@ import java.util.concurrent.ConcurrentHashMap;
      */
 public class TentativeBids {
     //<AuctionID,TentativeBidEntry>
-    ConcurrentHashMap<Integer,TentativeBidEntry> map=null;
-    int blockedUser=0;
-    int countTentativeBids=0;
+    private ConcurrentHashMap<Integer,TentativeBidEntry> map=null;
+    private int blockedUser=0;
+    
     
     TentativeBids()
     {
@@ -70,27 +70,36 @@ public class TentativeBids {
             
             
         }
-        
 
-        
-           TentativeBidEntry entry = new  TentativeBidEntry(auctionID,
-                   groupBidUser,amount);
-           map.put(auctionID, entry);
-           countTentativeBids++;
+       TentativeBidEntry entry = new  TentativeBidEntry(auctionID,
+               groupBidUser,amount);
+       map.put(auctionID, entry);
+       
        
         return true;
         
     }
     
+    public int getNumberofTentativeBids()
+    {
+        return this.map.size();
+    }
     
-    
-    private boolean isalreadyinsertedAuctionID(int auctionID)
+    public boolean isalreadyinsertedAuctionID(int auctionID)
     {
         boolean b=map.containsKey(new Integer(auctionID)); 
         return b;
     }
+    public boolean AuctionhasOneConfirmer(int auctionID)
+    {
+        TentativeBidEntry tbe=this.map.get(auctionID);
+        if(tbe.getFirstConfirmUser()!=null)
+            return true;
+        else
+            return false;
+    }
     
-    private boolean isalreadyregistratedgroupBidUser(String user)
+    public boolean isalreadyregistratedgroupBidUser(String user)
     {
         TentativeBidEntry tbe=null;
         Set<Entry<Integer,TentativeBidEntry>> entrySet=map.entrySet();
@@ -107,7 +116,7 @@ public class TentativeBids {
         return false;
     }
     
-    private boolean isalreadyregistratedConfirmedUser(String user)
+    public boolean isalreadyregistratedAsFirstConfirmedUser(String user)
     {
         TentativeBidEntry tbe=null;
         String FirstConfirmUser=null;
@@ -156,7 +165,7 @@ public class TentativeBids {
         tbe=null;
         TentativeBidEntry tmp=null;
         Integer key=new Integer(AuctionID);
-        if(this.isalreadyregistratedConfirmedUser(user))
+        if(this.isalreadyregistratedAsFirstConfirmedUser(user))
             return false;
         if(!this.map.containsKey(key))
             return false;
@@ -168,9 +177,9 @@ public class TentativeBids {
         else
         {
             tmp.setSecondConfirmUser(user);
-            tbe=tmp;
+            tbe.copy(tbe);
             this.map.remove(key);
-
+            
         }
         return true;
 
